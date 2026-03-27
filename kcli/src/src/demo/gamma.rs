@@ -21,4 +21,3 @@ pub fn get_inline_parser() -> Result<InlineParser, ConfigError> {
     )?;
     Ok(parser)
 }
-

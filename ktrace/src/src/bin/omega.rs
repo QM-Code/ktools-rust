@@ -1,8 +1,18 @@
 use std::error::Error;
 
-use ktrace::demo::alpha::get_trace_logger as get_alpha_trace_logger;
-use ktrace::demo::beta::get_trace_logger as get_beta_trace_logger;
-use ktrace::demo::gamma::get_trace_logger as get_gamma_trace_logger;
+use ktrace::demo::alpha::{
+    get_trace_logger as get_alpha_trace_logger,
+    test_standard_logging_channels as test_alpha_standard_logging_channels,
+    test_trace_logging_channels as test_alpha_trace_logging_channels,
+};
+use ktrace::demo::beta::{
+    get_trace_logger as get_beta_trace_logger,
+    test_trace_logging_channels as test_beta_trace_logging_channels,
+};
+use ktrace::demo::gamma::{
+    get_trace_logger as get_gamma_trace_logger,
+    test_trace_logging_channels as test_gamma_trace_logging_channels,
+};
 use ktrace::{ktrace_trace, Logger, TraceLogger};
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -10,8 +20,11 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let logger = Logger::new();
     let app_trace = TraceLogger::new("omega")?;
-    app_trace.add_channel("app", ktrace::color("BrightWhite")?)?;
-    app_trace.add_channel("startup", ktrace::color("BrightBlue")?)?;
+    app_trace.add_channel("app", ktrace::color("BrightCyan")?)?;
+    app_trace.add_channel("orchestrator", ktrace::color("BrightYellow")?)?;
+    app_trace.add_channel("deep", ktrace::DEFAULT_COLOR)?;
+    app_trace.add_channel("deep.branch", ktrace::DEFAULT_COLOR)?;
+    app_trace.add_channel("deep.branch.leaf", ktrace::color("LightSalmon1")?)?;
 
     let alpha_trace = get_alpha_trace_logger()?;
     let beta_trace = get_beta_trace_logger()?;
@@ -24,13 +37,35 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut parser = kcli::Parser::new();
     parser.add_inline_parser(logger.make_inline_parser(app_trace.clone(), "trace")?)?;
+
+    logger.enable_channel(".app", app_trace.namespace())?;
+    ktrace_trace!(app_trace, "app", "omega initialized local trace channels")?;
+    logger.disable_channel(".app", app_trace.namespace())?;
     parser.parse_or_exit(&argv);
 
-    logger.enable_channels("*.*", app_trace.namespace())?;
-    ktrace_trace!(app_trace, "app", "omega app trace")?;
-    ktrace_trace!(alpha_trace, "net", "alpha network trace")?;
-    ktrace_trace!(beta_trace, "io", "beta io trace")?;
-    ktrace_trace!(gamma_trace, "scheduler.tick", "gamma scheduler trace")?;
+    ktrace_trace!(
+        app_trace,
+        "app",
+        "cli processing enabled, use --trace for options"
+    )?;
+    ktrace_trace!(
+        app_trace,
+        "app",
+        "testing external tracing, use --trace '*.*' to view top-level channels"
+    )?;
+    ktrace_trace!(
+        app_trace,
+        "deep.branch.leaf",
+        "omega trace test on channel 'deep.branch.leaf'"
+    )?;
+    test_alpha_trace_logging_channels()?;
+    test_beta_trace_logging_channels()?;
+    test_gamma_trace_logging_channels()?;
+    test_alpha_standard_logging_channels()?;
+    app_trace.trace("orchestrator", "omega completed imported SDK trace checks")?;
+    app_trace.info("testing...")?;
+    app_trace.warn("testing...")?;
+    app_trace.error("testing...")?;
 
     println!();
     println!("Usage:");

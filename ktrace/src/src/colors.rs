@@ -19,13 +19,23 @@ const COLOR_NAMES: &[(&str, ColorId)] = &[
     ("BrightYellow", 11),
     ("DeepSkyBlue1", 39),
     ("Gold3", 142),
+    ("LightSkyBlue1", 153),
+    ("MediumOrchid1", 171),
+    ("MediumSpringGreen", 49),
     ("Orange3", 172),
+    ("LightSalmon1", 216),
 ];
 
 pub fn available_color_names() -> Vec<&'static str> {
     let mut names = COLOR_NAMES
         .iter()
-        .filter_map(|(name, color)| if *color == DEFAULT_COLOR && *name == "default" { None } else { Some(*name) })
+        .filter_map(|(name, color)| {
+            if *color == DEFAULT_COLOR && *name == "default" {
+                None
+            } else {
+                Some(*name)
+            }
+        })
         .collect::<Vec<_>>();
     names.sort_unstable();
     names.dedup();

@@ -19,4 +19,3 @@ pub(crate) fn print_processing_line(context: &HandlerContext, value: &str) {
         .join(",");
     println!("Processing {} with values [{}]", context.option, joined);
 }
-

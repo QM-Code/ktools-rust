@@ -34,6 +34,7 @@ use ktrace::TraceLogger;
 fn get_trace_logger() -> Result<TraceLogger, ktrace::TraceError> {
     let trace = TraceLogger::new("alpha")?;
     trace.add_channel("net", ktrace::color("DeepSkyBlue1")?)?;
+    trace.add_channel("net.alpha", ktrace::DEFAULT_COLOR)?;
     trace.add_channel("cache", ktrace::color("Gold3")?)?;
     Ok(trace)
 }
@@ -73,6 +74,10 @@ key changes.
 
 ## Where To See Running Examples
 
+- [`src/src/bin/bootstrap.rs`](../src/src/bin/bootstrap.rs)
+- [`src/src/bin/sdk_alpha.rs`](../src/src/bin/sdk_alpha.rs)
+- [`src/src/bin/sdk_beta.rs`](../src/src/bin/sdk_beta.rs)
+- [`src/src/bin/sdk_gamma.rs`](../src/src/bin/sdk_gamma.rs)
 - [`src/src/bin/core.rs`](../src/src/bin/core.rs)
 - [`src/src/bin/omega.rs`](../src/src/bin/omega.rs)
 - [`src/tests/demo_cli.rs`](../src/tests/demo_cli.rs)

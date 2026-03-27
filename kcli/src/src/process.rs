@@ -387,10 +387,7 @@ fn schedule_positionals(
     }
 }
 
-fn execute_invocations(
-    invocations: &[Invocation],
-    result: &mut ParseOutcome,
-) {
+fn execute_invocations(invocations: &[Invocation], result: &mut ParseOutcome) {
     for invocation in invocations {
         if !result.ok {
             return;
@@ -420,9 +417,9 @@ fn execute_invocations(
                     .value_handler
                     .as_ref()
                     .map(|handler| handler(&context, &value))
-                    .unwrap_or_else(|| {
-                        Err("kcli internal error: missing value handler".to_string())
-                    })
+                    .unwrap_or_else(
+                        || Err("kcli internal error: missing value handler".to_string()),
+                    )
             }
             InvocationKind::Positional => invocation
                 .positional_handler
@@ -530,8 +527,7 @@ pub(crate) fn parse_tokens(data: &ParserData, argv: &[String]) -> Result<(), Cli
                         .parser
                         .expect("dash inline option must have parser");
                     if !inline_match.suffix.is_empty() {
-                        if let Some(binding) =
-                            find_command(&parser.commands, &inline_match.suffix)
+                        if let Some(binding) = find_command(&parser.commands, &inline_match.suffix)
                         {
                             index = schedule_invocation(
                                 binding,
@@ -606,4 +602,3 @@ pub(crate) fn parse_tokens(data: &ParserData, argv: &[String]) -> Result<(), Cli
         Err(CliError::new(result.error_option, result.error_message))
     }
 }
-

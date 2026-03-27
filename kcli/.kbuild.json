@@ -12,6 +12,18 @@
     "package": "kcli",
     "tests": true,
     "demos": {
+      "bootstrap": {
+        "bin": "bootstrap"
+      },
+      "sdk/alpha": {
+        "bin": "sdk_alpha"
+      },
+      "sdk/beta": {
+        "bin": "sdk_beta"
+      },
+      "sdk/gamma": {
+        "bin": "sdk_gamma"
+      },
       "exe/core": {
         "bin": "core"
       },
@@ -23,11 +35,19 @@
   "build": {
     "jobs": 4,
     "demos": [
+      "bootstrap",
+      "sdk/alpha",
+      "sdk/beta",
+      "sdk/gamma",
       "exe/core",
       "exe/omega"
     ],
     "defaults": {
       "demos": [
+        "bootstrap",
+        "sdk/alpha",
+        "sdk/beta",
+        "sdk/gamma",
         "exe/core",
         "exe/omega"
       ]

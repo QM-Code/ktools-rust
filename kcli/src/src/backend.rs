@@ -4,8 +4,8 @@ use crate::model::{
 };
 use crate::normalize::{
     normalize_alias, normalize_alias_target_option, normalize_description,
-    normalize_help_placeholder, normalize_inline_handler_option,
-    normalize_inline_root_option, normalize_primary_handler_option,
+    normalize_help_placeholder, normalize_inline_handler_option, normalize_inline_root_option,
+    normalize_primary_handler_option,
 };
 
 fn make_flag_binding(
@@ -49,10 +49,7 @@ fn upsert_command(
     commands.push((command, binding));
 }
 
-pub(crate) fn set_inline_root(
-    data: &mut InlineParserData,
-    root: &str,
-) -> Result<(), ConfigError> {
+pub(crate) fn set_inline_root(data: &mut InlineParserData, root: &str) -> Result<(), ConfigError> {
     data.root_name = normalize_inline_root_option(root)?;
     Ok(())
 }
@@ -203,4 +200,3 @@ pub(crate) fn add_inline_parser(
     data.inline_parsers.push(parser);
     Ok(())
 }
-

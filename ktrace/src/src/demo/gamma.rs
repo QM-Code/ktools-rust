@@ -1,8 +1,24 @@
+use std::sync::OnceLock;
+
 use crate::{color, TraceLogger, TraceResult};
 
 pub fn get_trace_logger() -> TraceResult<TraceLogger> {
+    static TRACE: OnceLock<TraceLogger> = OnceLock::new();
+
+    if let Some(trace) = TRACE.get() {
+        return Ok(trace.clone());
+    }
+
     let trace = TraceLogger::new("gamma")?;
-    trace.add_channel("scheduler", color("BrightMagenta")?)?;
-    trace.add_channel("scheduler.tick", color("Orange3")?)?;
-    Ok(trace)
+    trace.add_channel("physics", color("MediumOrchid1")?)?;
+    trace.add_channel("metrics", color("LightSkyBlue1")?)?;
+    let _ = TRACE.set(trace.clone());
+    Ok(TRACE.get().cloned().unwrap_or(trace))
+}
+
+pub fn test_trace_logging_channels() -> TraceResult<()> {
+    let trace = get_trace_logger()?;
+    trace.trace("physics", "gamma trace test on channel 'physics'")?;
+    trace.trace("metrics", "gamma trace test on channel 'metrics'")?;
+    Ok(())
 }

@@ -113,4 +113,3 @@ pub(crate) struct ParserData {
     pub commands: Vec<(String, CommandBinding)>,
     pub inline_parsers: Vec<InlineParserData>,
 }
-

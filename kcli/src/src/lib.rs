@@ -8,9 +8,8 @@ use std::sync::Arc;
 
 use backend::{
     add_inline_parser, set_alias, set_inline_flag_handler, set_inline_optional_value_handler,
-    set_inline_root, set_inline_value_handler, set_positional_handler,
-    set_primary_flag_handler, set_primary_optional_value_handler,
-    set_primary_value_handler, set_root_value_handler,
+    set_inline_root, set_inline_value_handler, set_positional_handler, set_primary_flag_handler,
+    set_primary_optional_value_handler, set_primary_value_handler, set_root_value_handler,
     set_root_value_handler_with_help,
 };
 use model::{InlineParserData, ParserData, PositionalHandler};

@@ -139,7 +139,10 @@ fn split_channel_path(channel: &str) -> Option<Vec<&str>> {
     if tokens.is_empty() || tokens.len() > 3 {
         return None;
     }
-    if tokens.iter().any(|token| token.is_empty() || !is_selector_identifier(token)) {
+    if tokens
+        .iter()
+        .any(|token| token.is_empty() || !is_selector_identifier(token))
+    {
         return None;
     }
     Some(tokens)
@@ -166,10 +169,7 @@ fn format_source_label(source_path: &str) -> String {
 }
 
 fn format_function_label(function_name: &str) -> &str {
-    function_name
-        .rsplit("::")
-        .next()
-        .unwrap_or(function_name)
+    function_name.rsplit("::").next().unwrap_or(function_name)
 }
 
 fn timestamp_label() -> String {
@@ -366,7 +366,9 @@ fn parse_selector_list(list: &str, local_namespace: &str) -> TraceResult<Vec<Sel
         .map(|token| format!("'{token}'"))
         .collect::<Vec<_>>()
         .join(", ");
-    Err(TraceError::new(format!("Invalid trace selector(s): {details}")))
+    Err(TraceError::new(format!(
+        "Invalid trace selector(s): {details}"
+    )))
 }
 
 fn matches_selector(selector: &Selector, trace_namespace: &str, channel: &str) -> bool {
@@ -379,30 +381,43 @@ fn matches_selector(selector: &Selector, trace_namespace: &str, channel: &str) -
     };
 
     match selector.channel_tokens.len() {
-        1 => channel_parts.len() == 1 && (selector.channel_tokens[0] == "*" || selector.channel_tokens[0] == channel_parts[0]),
+        1 => {
+            channel_parts.len() == 1
+                && (selector.channel_tokens[0] == "*"
+                    || selector.channel_tokens[0] == channel_parts[0])
+        }
         2 => {
             if channel_parts.len() == 1 && selector.include_top_level {
                 return true;
             }
             channel_parts.len() == 2
-                && (selector.channel_tokens[0] == "*" || selector.channel_tokens[0] == channel_parts[0])
-                && (selector.channel_tokens[1] == "*" || selector.channel_tokens[1] == channel_parts[1])
+                && (selector.channel_tokens[0] == "*"
+                    || selector.channel_tokens[0] == channel_parts[0])
+                && (selector.channel_tokens[1] == "*"
+                    || selector.channel_tokens[1] == channel_parts[1])
         }
         3 => {
-            let include_up_to_depth_three = selector.channel_tokens.iter().all(|token| token == "*");
+            let include_up_to_depth_three =
+                selector.channel_tokens.iter().all(|token| token == "*");
             if include_up_to_depth_three {
                 return (1..=3).contains(&channel_parts.len());
             }
             channel_parts.len() == 3
-                && (selector.channel_tokens[0] == "*" || selector.channel_tokens[0] == channel_parts[0])
-                && (selector.channel_tokens[1] == "*" || selector.channel_tokens[1] == channel_parts[1])
-                && (selector.channel_tokens[2] == "*" || selector.channel_tokens[2] == channel_parts[2])
+                && (selector.channel_tokens[0] == "*"
+                    || selector.channel_tokens[0] == channel_parts[0])
+                && (selector.channel_tokens[1] == "*"
+                    || selector.channel_tokens[1] == channel_parts[1])
+                && (selector.channel_tokens[2] == "*"
+                    || selector.channel_tokens[2] == channel_parts[2])
         }
         _ => false,
     }
 }
 
-fn parse_exact_selector(selector_text: &str, local_namespace: &str) -> TraceResult<(String, String)> {
+fn parse_exact_selector(
+    selector_text: &str,
+    local_namespace: &str,
+) -> TraceResult<(String, String)> {
     let selector = trim_whitespace(selector_text);
     let Some(dot) = selector.find('.') else {
         return Err(TraceError::new(format!(
@@ -418,21 +433,31 @@ fn parse_exact_selector(selector_text: &str, local_namespace: &str) -> TraceResu
     let channel = selector[dot + 1..].to_string();
 
     if !is_selector_identifier(&trace_namespace) {
-        return Err(TraceError::new(format!("invalid trace namespace '{trace_namespace}'")));
+        return Err(TraceError::new(format!(
+            "invalid trace namespace '{trace_namespace}'"
+        )));
     }
     if !is_valid_channel_path(&channel) {
-        return Err(TraceError::new(format!("invalid trace channel '{channel}'")));
+        return Err(TraceError::new(format!(
+            "invalid trace channel '{channel}'"
+        )));
     }
 
     Ok((trace_namespace, channel))
 }
 
-fn merge_color(existing_color: ColorId, new_color: ColorId, qualified_name: &str) -> TraceResult<ColorId> {
+fn merge_color(
+    existing_color: ColorId,
+    new_color: ColorId,
+    qualified_name: &str,
+) -> TraceResult<ColorId> {
     if new_color == DEFAULT_COLOR {
         return Ok(existing_color);
     }
     if new_color > 255 {
-        return Err(TraceError::new(format!("invalid trace color id '{new_color}'")));
+        return Err(TraceError::new(format!(
+            "invalid trace color id '{new_color}'"
+        )));
     }
     if existing_color == DEFAULT_COLOR || existing_color == new_color {
         return Ok(new_color);
@@ -446,7 +471,9 @@ impl TraceLogger {
     pub fn new(trace_namespace: impl AsRef<str>) -> TraceResult<Self> {
         let trace_namespace = trim_whitespace(trace_namespace.as_ref());
         if !is_selector_identifier(&trace_namespace) {
-            return Err(TraceError::new(format!("invalid trace namespace '{trace_namespace}'")));
+            return Err(TraceError::new(format!(
+                "invalid trace namespace '{trace_namespace}'"
+            )));
         }
 
         Ok(Self {
@@ -462,7 +489,9 @@ impl TraceLogger {
     pub fn add_channel(&self, channel: impl AsRef<str>, color: ColorId) -> TraceResult<()> {
         let channel_name = trim_whitespace(channel.as_ref());
         if !is_valid_channel_path(&channel_name) {
-            return Err(TraceError::new(format!("invalid trace channel '{channel_name}'")));
+            return Err(TraceError::new(format!(
+                "invalid trace channel '{channel_name}'"
+            )));
         }
         if color != DEFAULT_COLOR && color > 255 {
             return Err(TraceError::new(format!("invalid trace color id '{color}'")));
@@ -483,7 +512,10 @@ impl TraceLogger {
             }
         }
 
-        if let Some(existing) = channels.iter_mut().find(|existing| existing.name == channel_name) {
+        if let Some(existing) = channels
+            .iter_mut()
+            .find(|existing| existing.name == channel_name)
+        {
             existing.color = merge_color(
                 existing.color,
                 color,
@@ -518,7 +550,9 @@ impl TraceLogger {
             return false;
         }
         self.attached_logger()
-            .map(|logger| Logger { inner: logger }.is_trace_channel_enabled(self.namespace(), &channel_name))
+            .map(|logger| {
+                Logger { inner: logger }.is_trace_channel_enabled(self.namespace(), &channel_name)
+            })
             .unwrap_or(false)
     }
 
@@ -540,7 +574,9 @@ impl TraceLogger {
     ) -> TraceResult<()> {
         let channel_name = trim_whitespace(channel);
         if !is_valid_channel_path(&channel_name) {
-            return Err(TraceError::new(format!("invalid trace channel '{channel_name}'")));
+            return Err(TraceError::new(format!(
+                "invalid trace channel '{channel_name}'"
+            )));
         }
 
         let Some(logger) = self.attached_logger() else {
@@ -580,7 +616,9 @@ impl TraceLogger {
     ) -> TraceResult<()> {
         let channel_name = trim_whitespace(channel);
         if !is_valid_channel_path(&channel_name) {
-            return Err(TraceError::new(format!("invalid trace channel '{channel_name}'")));
+            return Err(TraceError::new(format!(
+                "invalid trace channel '{channel_name}'"
+            )));
         }
 
         let site_key = format!(
@@ -672,7 +710,9 @@ impl Logger {
             .map_err(|_| TraceError::new("ktrace attachment mutex is poisoned"))?;
         if let Some(existing) = attached_logger.as_ref().and_then(Weak::upgrade) {
             if !Arc::ptr_eq(&existing, &self.inner) {
-                return Err(TraceError::new("trace logger is already attached to another logger"));
+                return Err(TraceError::new(
+                    "trace logger is already attached to another logger",
+                ));
             }
         }
 
@@ -703,7 +743,10 @@ impl Logger {
         for channel in channels {
             if let Some(parent_index) = channel.name.rfind('.') {
                 let parent = &channel.name[..parent_index];
-                if !registered_channels.iter().any(|existing| existing == parent) {
+                if !registered_channels
+                    .iter()
+                    .any(|existing| existing == parent)
+                {
                     return Err(TraceError::new(format!(
                         "cannot register unparented trace channel '{}' (missing parent '{}')",
                         channel.name, parent
@@ -711,7 +754,10 @@ impl Logger {
                 }
             }
 
-            if !registered_channels.iter().any(|existing| existing == &channel.name) {
+            if !registered_channels
+                .iter()
+                .any(|existing| existing == &channel.name)
+            {
                 registered_channels.push(channel.name.clone());
             }
 
@@ -728,21 +774,21 @@ impl Logger {
             }
         }
 
-        registry.channels_by_namespace.insert(
-            logger.data.trace_namespace.clone(),
-            registered_channels,
-        );
-        registry.channel_colors_by_namespace.insert(
-            logger.data.trace_namespace.clone(),
-            registered_colors,
-        );
+        registry
+            .channels_by_namespace
+            .insert(logger.data.trace_namespace.clone(), registered_channels);
+        registry
+            .channel_colors_by_namespace
+            .insert(logger.data.trace_namespace.clone(), registered_colors);
 
         if !registry
             .attached_trace_loggers
             .iter()
             .any(|candidate| Arc::ptr_eq(candidate, &logger.data))
         {
-            registry.attached_trace_loggers.push(Arc::clone(&logger.data));
+            registry
+                .attached_trace_loggers
+                .push(Arc::clone(&logger.data));
         }
 
         *attached_logger = Some(Arc::downgrade(&self.inner));
@@ -827,7 +873,11 @@ impl Logger {
         } else {
             "ktrace"
         };
-        let prefix = self.build_log_prefix(namespace_label, Severity::Warning, SourceLocation::new("", 0, ""))?;
+        let prefix = self.build_log_prefix(
+            namespace_label,
+            Severity::Warning,
+            SourceLocation::new("", 0, ""),
+        )?;
         emit_line(&self.inner, &prefix, &message)
     }
 
@@ -865,7 +915,9 @@ impl Logger {
     ) -> TraceResult<()> {
         let selector_text = trim_whitespace(selectors_csv.as_ref());
         if selector_text.is_empty() {
-            return Err(TraceError::new("EnableChannels requires one or more selectors"));
+            return Err(TraceError::new(
+                "EnableChannels requires one or more selectors",
+            ));
         }
 
         let selectors = parse_selector_list(&selector_text, local_namespace.as_ref())?;
@@ -899,7 +951,9 @@ impl Logger {
     ) -> bool {
         parse_exact_selector(qualified_channel.as_ref(), local_namespace.as_ref())
             .ok()
-            .map(|(trace_namespace, channel)| self.is_trace_channel_enabled(&trace_namespace, &channel))
+            .map(|(trace_namespace, channel)| {
+                self.is_trace_channel_enabled(&trace_namespace, &channel)
+            })
             .unwrap_or(false)
     }
 
@@ -937,7 +991,9 @@ impl Logger {
     ) -> TraceResult<()> {
         let selector_text = trim_whitespace(selectors_csv.as_ref());
         if selector_text.is_empty() {
-            return Err(TraceError::new("DisableChannels requires one or more selectors"));
+            return Err(TraceError::new(
+                "DisableChannels requires one or more selectors",
+            ));
         }
 
         let selectors = parse_selector_list(&selector_text, local_namespace.as_ref())?;
@@ -998,7 +1054,9 @@ impl Logger {
     pub fn get_channels(&self, trace_namespace: impl AsRef<str>) -> TraceResult<Vec<String>> {
         let trace_namespace = trim_whitespace(trace_namespace.as_ref());
         if !is_selector_identifier(&trace_namespace) {
-            return Err(TraceError::new(format!("invalid trace namespace '{trace_namespace}'")));
+            return Err(TraceError::new(format!(
+                "invalid trace namespace '{trace_namespace}'"
+            )));
         }
 
         let mut channels = self
@@ -1106,9 +1164,11 @@ impl Logger {
             let logger = logger.clone();
             let local_namespace = local_namespace.clone();
             parser.set_root_value_handler_with_help(
-                move |_context, value| logger
-                    .enable_channels(value, &local_namespace)
-                    .map_err(|error| error.to_string()),
+                move |_context, value| {
+                    logger
+                        .enable_channels(value, &local_namespace)
+                        .map_err(|error| error.to_string())
+                },
                 "<channels>",
                 "Trace selected channels.",
             )?;
@@ -1120,14 +1180,19 @@ impl Logger {
                 let option_root = format!("--{}", context.root);
                 println!();
                 println!("General trace selector pattern:");
-                println!("  {} <namespace>.<channel>[.<subchannel>[.<subchannel>]]", option_root);
+                println!(
+                    "  {} <namespace>.<channel>[.<subchannel>[.<subchannel>]]",
+                    option_root
+                );
                 println!();
                 println!("Trace selector examples:");
                 println!("  {} '.abc'", option_root);
                 println!("  {} 'otherapp.channel'", option_root);
                 println!("  {} '*.*'", option_root);
                 println!("  {} '*.*.*'", option_root);
+                println!("  {} '*.*.*.*'", option_root);
                 println!("  {} 'alpha.*'", option_root);
+                println!("  {} 'alpha.*.*.*'", option_root);
                 println!("  {} '*.net'", option_root);
                 println!("  {} '*.{{net,io}}'", option_root);
                 println!();
@@ -1210,7 +1275,9 @@ impl Logger {
             parser.set_flag_handler(
                 "-files",
                 move |_context| {
-                    let mut options = logger.get_output_options().map_err(|error| error.to_string())?;
+                    let mut options = logger
+                        .get_output_options()
+                        .map_err(|error| error.to_string())?;
                     options.filenames = true;
                     options.line_numbers = true;
                     logger
@@ -1226,7 +1293,9 @@ impl Logger {
             parser.set_flag_handler(
                 "-functions",
                 move |_context| {
-                    let mut options = logger.get_output_options().map_err(|error| error.to_string())?;
+                    let mut options = logger
+                        .get_output_options()
+                        .map_err(|error| error.to_string())?;
                     options.filenames = true;
                     options.line_numbers = true;
                     options.function_names = true;
@@ -1243,7 +1312,9 @@ impl Logger {
             parser.set_flag_handler(
                 "-timestamps",
                 move |_context| {
-                    let mut options = logger.get_output_options().map_err(|error| error.to_string())?;
+                    let mut options = logger
+                        .get_output_options()
+                        .map_err(|error| error.to_string())?;
                     options.timestamps = true;
                     logger
                         .set_output_options(options)

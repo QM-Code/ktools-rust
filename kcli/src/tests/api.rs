@@ -12,9 +12,16 @@ fn parser_empty_parse_succeeds() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
-fn end_user_known_options_with_unknown_option_error(
-) -> Result<(), Box<dyn std::error::Error>> {
-    let argv = ["prog", "--verbose", "pos1", "--output", "stdout", "--bogus", "pos2"];
+fn end_user_known_options_with_unknown_option_error() -> Result<(), Box<dyn std::error::Error>> {
+    let argv = [
+        "prog",
+        "--verbose",
+        "pos1",
+        "--output",
+        "stdout",
+        "--bogus",
+        "pos2",
+    ];
     let verbose = Rc::new(RefCell::new(false));
     let output = Rc::new(RefCell::new(String::new()));
     let positionals = Rc::new(RefCell::new(Vec::<String>::new()));
@@ -90,8 +97,7 @@ fn add_alias_rewrites_tokens() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
-fn add_alias_preset_tokens_apply_to_inline_root_values(
-) -> Result<(), Box<dyn std::error::Error>> {
+fn add_alias_preset_tokens_apply_to_inline_root_values() -> Result<(), Box<dyn std::error::Error>> {
     let argv = ["prog", "-c"];
     let seen = Rc::new(RefCell::new(String::new()));
     let tokens = Rc::new(RefCell::new(Vec::<String>::new()));
@@ -116,13 +122,15 @@ fn add_alias_preset_tokens_apply_to_inline_root_values(
 
     parser.parse(&argv)?;
     assert_eq!(seen.borrow().as_str(), "user-file=/tmp/user.json");
-    assert_eq!(*tokens.borrow(), vec!["user-file=/tmp/user.json".to_string()]);
+    assert_eq!(
+        *tokens.borrow(),
+        vec!["user-file=/tmp/user.json".to_string()]
+    );
     Ok(())
 }
 
 #[test]
-fn optional_value_handler_allows_missing_value(
-) -> Result<(), Box<dyn std::error::Error>> {
+fn optional_value_handler_allows_missing_value() -> Result<(), Box<dyn std::error::Error>> {
     let argv = ["prog", "--build-enable"];
     let value = Rc::new(RefCell::new(String::from("sentinel")));
     let tokens = Rc::new(RefCell::new(Vec::<String>::new()));
@@ -177,8 +185,7 @@ fn required_value_handler_accepts_dash_prefixed_first_value(
 }
 
 #[test]
-fn positional_handler_preserves_explicit_empty_tokens(
-) -> Result<(), Box<dyn std::error::Error>> {
+fn positional_handler_preserves_explicit_empty_tokens() -> Result<(), Box<dyn std::error::Error>> {
     let argv = ["prog", "", "tail"];
     let positionals = Rc::new(RefCell::new(Vec::<String>::new()));
 
@@ -227,8 +234,7 @@ fn option_handler_error_returns_cli_error() -> Result<(), Box<dyn std::error::Er
 }
 
 #[test]
-fn add_alias_rejects_preset_values_for_flag_targets(
-) -> Result<(), Box<dyn std::error::Error>> {
+fn add_alias_rejects_preset_values_for_flag_targets() -> Result<(), Box<dyn std::error::Error>> {
     let argv = ["prog", "-v"];
     let mut parser = Parser::new();
     parser.add_alias("-v", "--verbose", &["unexpected"])?;
@@ -258,4 +264,3 @@ fn cli_error_default_message_is_used() {
     let error = CliError::new("", "");
     assert_eq!(error.to_string(), "kcli parse failed");
 }
-

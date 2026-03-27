@@ -21,7 +21,9 @@ This workspace currently contains:
 
 - `kcli/`
 - `ktrace/`
-- `kbuild/` (Rust-local copy for Cargo integration)
+
+The shared `kbuild` implementation currently lives in the sibling
+`../kbuild/` repo rather than inside this workspace.
 
 ## Guidance For Agents
 
@@ -29,4 +31,4 @@ This workspace currently contains:
 2. Prefer making changes in the narrowest repo that actually owns the behavior.
 3. Use the root workspace only for Rust-workspace-wide concerns such as root docs or cross-repo coordination.
 4. Read the relevant child repo `AGENTS.md` and `README.md` files before changing code in that repo.
-5. Prefer the local Rust workspace `kbuild.py` and `kbuild/` copy when the task depends on Rust-specific build behavior.
+5. Prefer `kbuild` from `PATH` when available, or use the shared `../kbuild/kbuild.py` script from this workspace when the task depends on repo build behavior.

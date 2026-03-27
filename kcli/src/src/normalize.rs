@@ -90,16 +90,12 @@ pub(crate) fn normalize_inline_handler_option(
         return Err(ConfigError::new("kcli command must not start with '-'"));
     }
     if contains_whitespace(&normalized) {
-        return Err(ConfigError::new(
-            "kcli command must not contain whitespace",
-        ));
+        return Err(ConfigError::new("kcli command must not contain whitespace"));
     }
     Ok(normalized)
 }
 
-pub(crate) fn normalize_primary_handler_option(
-    raw_option: &str,
-) -> Result<String, ConfigError> {
+pub(crate) fn normalize_primary_handler_option(raw_option: &str) -> Result<String, ConfigError> {
     let option = trim_whitespace(raw_option);
     if option.is_empty() {
         return Err(ConfigError::new(
@@ -124,16 +120,17 @@ pub(crate) fn normalize_primary_handler_option(
         return Err(ConfigError::new("kcli command must not start with '-'"));
     }
     if contains_whitespace(&normalized) {
-        return Err(ConfigError::new(
-            "kcli command must not contain whitespace",
-        ));
+        return Err(ConfigError::new("kcli command must not contain whitespace"));
     }
     Ok(normalized)
 }
 
 pub(crate) fn normalize_alias(raw_alias: &str) -> Result<String, ConfigError> {
     let alias = trim_whitespace(raw_alias);
-    if alias.len() < 2 || !alias.starts_with('-') || alias.starts_with("--") || contains_whitespace(alias)
+    if alias.len() < 2
+        || !alias.starts_with('-')
+        || alias.starts_with("--")
+        || contains_whitespace(alias)
     {
         return Err(ConfigError::new(
             "kcli alias must use single-dash form, e.g. '-v'",
@@ -142,9 +139,7 @@ pub(crate) fn normalize_alias(raw_alias: &str) -> Result<String, ConfigError> {
     Ok(alias.to_string())
 }
 
-pub(crate) fn normalize_alias_target_option(
-    raw_target: &str,
-) -> Result<String, ConfigError> {
+pub(crate) fn normalize_alias_target_option(raw_target: &str) -> Result<String, ConfigError> {
     let target = trim_whitespace(raw_target);
     if target.len() < 3 || !target.starts_with("--") || contains_whitespace(target) {
         return Err(ConfigError::new(
@@ -159,14 +154,10 @@ pub(crate) fn normalize_alias_target_option(
     Ok(target.to_string())
 }
 
-pub(crate) fn normalize_help_placeholder(
-    raw_placeholder: &str,
-) -> Result<String, ConfigError> {
+pub(crate) fn normalize_help_placeholder(raw_placeholder: &str) -> Result<String, ConfigError> {
     let placeholder = trim_whitespace(raw_placeholder);
     if placeholder.is_empty() {
-        return Err(ConfigError::new(
-            "kcli help placeholder must not be empty",
-        ));
+        return Err(ConfigError::new("kcli help placeholder must not be empty"));
     }
     Ok(placeholder.to_string())
 }
@@ -180,4 +171,3 @@ pub(crate) fn normalize_description(raw_description: &str) -> Result<String, Con
     }
     Ok(description.to_string())
 }
-

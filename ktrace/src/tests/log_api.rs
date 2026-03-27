@@ -40,7 +40,9 @@ fn trace_output_respects_channel_enablement() -> Result<(), Box<dyn std::error::
     logger.enable_channel("tests.trace", "")?;
 
     let output = capture_stdout(|| {
-        trace.trace("trace", "member 42 {ok}").expect("trace should log");
+        trace
+            .trace("trace", "member 42 {ok}")
+            .expect("trace should log");
     });
 
     assert!(output.contains("[tests] [trace]"));

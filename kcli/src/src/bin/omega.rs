@@ -15,11 +15,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     gamma_parser.set_root("--newgamma")?;
 
     let mut build_parser = InlineParser::new("--build")?;
-    build_parser.set_value_handler(
-        "-profile",
-        |_context, _value| Ok(()),
-        "Set build profile.",
-    )?;
+    build_parser.set_value_handler("-profile", |_context, _value| Ok(()), "Set build profile.")?;
     build_parser.set_flag_handler("-clean", |_context| Ok(()), "Enable clean build.")?;
 
     parser.add_inline_parser(alpha_parser)?;
@@ -32,7 +28,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     parser.add_alias("-a", "--alpha-enable", &[] as &[&str])?;
     parser.add_alias("-b", "--build-profile", &[] as &[&str])?;
 
-    parser.set_flag_handler("--verbose", |_context| Ok(()), "Enable verbose app logging.")?;
+    parser.set_flag_handler(
+        "--verbose",
+        |_context| Ok(()),
+        "Enable verbose app logging.",
+    )?;
     parser.set_value_handler(
         "--output",
         |_context, _value| Ok(()),
@@ -54,4 +54,3 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     Ok(())
 }
-

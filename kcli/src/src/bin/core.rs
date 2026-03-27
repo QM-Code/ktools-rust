@@ -21,7 +21,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     parser.add_alias("-out", "--output", &[] as &[&str])?;
     parser.add_alias("-a", "--alpha-enable", &[] as &[&str])?;
 
-    parser.set_flag_handler("--verbose", |_context| Ok(()), "Enable verbose app logging.")?;
+    parser.set_flag_handler(
+        "--verbose",
+        |_context| Ok(()),
+        "Enable verbose app logging.",
+    )?;
     parser.set_value_handler(
         "--output",
         |_context, _value| Ok(()),
@@ -43,4 +47,3 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     Ok(())
 }
-

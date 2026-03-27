@@ -29,7 +29,7 @@ Selector lists support:
 
 - CSV: `alpha.net,beta.io`
 - wildcard namespace: `*.net`
-- wildcard channel segments: `alpha.*`, `*.*`, `*.*.*`
+- wildcard channel segments: `alpha.*`, `alpha.*.*`, `alpha.*.*.*`, `*.*`, `*.*.*`, `*.*.*.*`
 - brace expansion: `*.{net,io}`, `{alpha,beta}.scheduler`
 - local-namespace shorthand: `.startup,.net`
 
@@ -50,7 +50,8 @@ app.*.*
 - empty selector lists are rejected
 - invalid selector syntax raises `TraceError`
 - `*.*` includes top-level channels across namespaces
-- `*.*.*` includes channels up to depth 3
+- `*.*.*` includes channels up to depth 2 across namespaces
+- `*.*.*.*` includes channels up to depth 3 across namespaces
 
 ## `kcli` Inline Parser
 
@@ -75,6 +76,7 @@ Common commands:
 --trace 'app.startup'
 --trace '*.net'
 --trace '*.{net,io}'
+--trace '*.*.*.*'
 --trace-namespaces
 --trace-channels
 --trace-colors

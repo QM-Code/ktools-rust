@@ -2,7 +2,6 @@ mod common;
 
 use ktrace::{color, Logger, TraceLogger};
 
-
 fn add_test_channels(logger: &Logger) -> Result<(), Box<dyn std::error::Error>> {
     let trace = TraceLogger::new("tests")?;
     trace.add_channel("net", color("DeepSkyBlue1")?)?;
@@ -53,8 +52,8 @@ fn selector_lists_only_enable_registered_channels() -> Result<(), Box<dyn std::e
 }
 
 #[test]
-fn duplicate_namespaces_merge_but_conflicting_colors_fail(
-) -> Result<(), Box<dyn std::error::Error>> {
+fn duplicate_namespaces_merge_but_conflicting_colors_fail() -> Result<(), Box<dyn std::error::Error>>
+{
     let logger = Logger::new();
 
     let first = TraceLogger::new("tests")?;

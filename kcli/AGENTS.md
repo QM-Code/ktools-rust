@@ -3,7 +3,6 @@
 Assume these have already been read:
 
 - `../../ktools/AGENTS.md`
-- `../../kcli/AGENTS.md`
 - `../AGENTS.md`
 
 `ktools-rust/kcli/` is the Rust implementation repo for `kcli`.
@@ -12,7 +11,7 @@ Assume these have already been read:
 
 - Rust API and parsing behavior for `kcli`
 - Rust demo binaries and tests
-- Rust-local `kbuild` integration for this repo
+- workspace `kbuild` integration for this repo
 
 ## Local Bootstrap
 

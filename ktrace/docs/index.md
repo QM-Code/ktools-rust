@@ -65,7 +65,11 @@ ktrace_info!(app_trace, "operator-visible message")?;
 ## Working References
 
 - Public API: [`src/src/lib.rs`](../src/src/lib.rs)
-- Demo binaries: [`src/src/bin/core.rs`](../src/src/bin/core.rs),
+- Demo binaries: [`src/src/bin/bootstrap.rs`](../src/src/bin/bootstrap.rs),
+  [`src/src/bin/sdk_alpha.rs`](../src/src/bin/sdk_alpha.rs),
+  [`src/src/bin/sdk_beta.rs`](../src/src/bin/sdk_beta.rs),
+  [`src/src/bin/sdk_gamma.rs`](../src/src/bin/sdk_gamma.rs),
+  [`src/src/bin/core.rs`](../src/src/bin/core.rs),
   [`src/src/bin/omega.rs`](../src/src/bin/omega.rs)
 - Behavior coverage: [`src/tests/channel_semantics.rs`](../src/tests/channel_semantics.rs),
   [`src/tests/log_api.rs`](../src/tests/log_api.rs),
