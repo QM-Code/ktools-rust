@@ -1,0 +1,16 @@
+{
+  "project": {
+    "title": "Karma Tools Rust Workspace",
+    "id": "ktools_rust"
+  },
+  "git": {
+    "url": "https://github.com/QM-Code/ktools-rust",
+    "auth": "git@github.com:QM-Code/ktools-rust.git"
+  },
+  "batch": {
+    "repos": [
+      "kcli",
+      "ktrace"
+    ]
+  }
+}

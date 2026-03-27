@@ -1,0 +1,36 @@
+{
+  "project": {
+    "title": "Karma CLI Rust SDK",
+    "id": "kcli_rust"
+  },
+  "git": {
+    "url": "https://github.com/QM-Code/kcli-rust",
+    "auth": "git@github.com:QM-Code/kcli-rust.git"
+  },
+  "cargo": {
+    "manifest": "src/Cargo.toml",
+    "package": "kcli",
+    "tests": true,
+    "demos": {
+      "exe/core": {
+        "bin": "core"
+      },
+      "exe/omega": {
+        "bin": "omega"
+      }
+    }
+  },
+  "build": {
+    "jobs": 4,
+    "demos": [
+      "exe/core",
+      "exe/omega"
+    ],
+    "defaults": {
+      "demos": [
+        "exe/core",
+        "exe/omega"
+      ]
+    }
+  }
+}

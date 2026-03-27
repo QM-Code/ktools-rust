@@ -1,0 +1,36 @@
+{
+  "project": {
+    "title": "Karma Trace Rust SDK",
+    "id": "ktrace_rust"
+  },
+  "git": {
+    "url": "https://github.com/QM-Code/ktrace-rust",
+    "auth": "git@github.com:QM-Code/ktrace-rust.git"
+  },
+  "cargo": {
+    "manifest": "src/Cargo.toml",
+    "package": "ktrace",
+    "tests": true,
+    "demos": {
+      "exe/core": {
+        "bin": "core"
+      },
+      "exe/omega": {
+        "bin": "omega"
+      }
+    }
+  },
+  "build": {
+    "jobs": 4,
+    "demos": [
+      "exe/core",
+      "exe/omega"
+    ],
+    "defaults": {
+      "demos": [
+        "exe/core",
+        "exe/omega"
+      ]
+    }
+  }
+}
