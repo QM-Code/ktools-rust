@@ -32,3 +32,4 @@ The shared `kbuild` implementation currently lives in the sibling
 3. Use the root workspace only for Rust-workspace-wide concerns such as root docs or cross-repo coordination.
 4. Read the relevant child repo `AGENTS.md` and `README.md` files before changing code in that repo.
 5. Prefer `kbuild` from `PATH` when available, or use the shared `../kbuild/kbuild.py` script from this workspace when the task depends on repo build behavior.
+
