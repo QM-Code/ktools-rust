@@ -87,12 +87,13 @@ kbuild --build-latest
 
 If you want complete, compiling examples, start with:
 
-- [`../src/src/bin/bootstrap.rs`](../src/src/bin/bootstrap.rs)
-- [`../src/src/bin/sdk_alpha.rs`](../src/src/bin/sdk_alpha.rs)
-- [`../src/src/bin/sdk_beta.rs`](../src/src/bin/sdk_beta.rs)
-- [`../src/src/bin/sdk_gamma.rs`](../src/src/bin/sdk_gamma.rs)
-- [`../src/src/bin/core.rs`](../src/src/bin/core.rs)
-- [`../src/src/bin/omega.rs`](../src/src/bin/omega.rs)
+- [`../demo/bootstrap/src/main.rs`](../demo/bootstrap/src/main.rs)
+- [`../demo/sdk/alpha/src/lib.rs`](../demo/sdk/alpha/src/lib.rs)
+- [`../demo/sdk/alpha/src/main.rs`](../demo/sdk/alpha/src/main.rs)
+- [`../demo/sdk/beta/src/lib.rs`](../demo/sdk/beta/src/lib.rs)
+- [`../demo/sdk/gamma/src/lib.rs`](../demo/sdk/gamma/src/lib.rs)
+- [`../demo/exe/core/src/main.rs`](../demo/exe/core/src/main.rs)
+- [`../demo/exe/omega/src/main.rs`](../demo/exe/omega/src/main.rs)
 - [`../src/tests/api.rs`](../src/tests/api.rs)
 
 The public API contract lives in [`../src/src/lib.rs`](../src/src/lib.rs).

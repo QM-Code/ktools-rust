@@ -1,5 +1,4 @@
 mod backend;
-pub mod demo;
 mod model;
 mod normalize;
 mod process;

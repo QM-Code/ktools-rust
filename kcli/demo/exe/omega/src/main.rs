@@ -1,8 +1,8 @@
 use std::error::Error;
 
-use kcli::demo::alpha::get_inline_parser as get_alpha_inline_parser;
-use kcli::demo::beta::get_inline_parser as get_beta_inline_parser;
-use kcli::demo::gamma::get_inline_parser as get_gamma_inline_parser;
+use alpha::get_inline_parser as get_alpha_inline_parser;
+use beta::get_inline_parser as get_beta_inline_parser;
+use gamma::get_inline_parser as get_gamma_inline_parser;
 use kcli::{InlineParser, Parser};
 
 fn main() -> Result<(), Box<dyn Error>> {

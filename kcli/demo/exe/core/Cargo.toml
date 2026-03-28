@@ -1,0 +1,12 @@
+[package]
+name = "kcli_demo_core"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "core"
+path = "src/main.rs"
+
+[dependencies]
+alpha = { package = "kcli_demo_alpha", path = "../../sdk/alpha" }
+kcli = { path = "../../../src" }

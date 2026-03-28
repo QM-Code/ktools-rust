@@ -1,0 +1,15 @@
+[package]
+name = "kcli_demo_gamma"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "gamma"
+path = "src/lib.rs"
+
+[[bin]]
+name = "sdk_gamma"
+path = "src/main.rs"
+
+[dependencies]
+kcli = { path = "../../../src" }

@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use kcli::demo::alpha::get_inline_parser;
+use alpha::get_inline_parser;
 use kcli::Parser;
 
 fn executable_name(path: Option<&str>) -> &str {

@@ -11,23 +11,37 @@
     "manifest": "src/Cargo.toml",
     "package": "kcli",
     "tests": true,
+    "sdk": {
+      "include": [
+        "Cargo.toml",
+        "README.md",
+        "src",
+        "tests"
+      ]
+    },
     "demos": {
       "bootstrap": {
+        "manifest": "demo/bootstrap/Cargo.toml",
         "bin": "bootstrap"
       },
       "sdk/alpha": {
+        "manifest": "demo/sdk/alpha/Cargo.toml",
         "bin": "sdk_alpha"
       },
       "sdk/beta": {
+        "manifest": "demo/sdk/beta/Cargo.toml",
         "bin": "sdk_beta"
       },
       "sdk/gamma": {
+        "manifest": "demo/sdk/gamma/Cargo.toml",
         "bin": "sdk_gamma"
       },
       "exe/core": {
+        "manifest": "demo/exe/core/Cargo.toml",
         "bin": "core"
       },
       "exe/omega": {
+        "manifest": "demo/exe/omega/Cargo.toml",
         "bin": "omega"
       }
     }

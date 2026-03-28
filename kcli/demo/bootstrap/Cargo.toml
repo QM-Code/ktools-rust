@@ -1,0 +1,11 @@
+[package]
+name = "kcli_demo_bootstrap"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "bootstrap"
+path = "src/main.rs"
+
+[dependencies]
+kcli = { path = "../../src" }

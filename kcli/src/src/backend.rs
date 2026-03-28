@@ -35,20 +35,6 @@ fn make_value_binding(
     })
 }
 
-fn upsert_command(
-    commands: &mut Vec<(String, CommandBinding)>,
-    command: String,
-    binding: CommandBinding,
-) {
-    for entry in commands.iter_mut() {
-        if entry.0 == command {
-            entry.1 = binding;
-            return;
-        }
-    }
-    commands.push((command, binding));
-}
-
 pub(crate) fn set_inline_root(data: &mut InlineParserData, root: &str) -> Result<(), ConfigError> {
     data.root_name = normalize_inline_root_option(root)?;
     Ok(())
@@ -84,7 +70,7 @@ pub(crate) fn set_inline_flag_handler(
 ) -> Result<(), ConfigError> {
     let command = normalize_inline_handler_option(option, &data.root_name)?;
     let binding = make_flag_binding(handler, description)?;
-    upsert_command(&mut data.commands, command, binding);
+    data.commands.insert_or_replace(command, binding);
     Ok(())
 }
 
@@ -96,7 +82,7 @@ pub(crate) fn set_inline_value_handler(
 ) -> Result<(), ConfigError> {
     let command = normalize_inline_handler_option(option, &data.root_name)?;
     let binding = make_value_binding(handler, description, ValueArity::Required)?;
-    upsert_command(&mut data.commands, command, binding);
+    data.commands.insert_or_replace(command, binding);
     Ok(())
 }
 
@@ -108,7 +94,7 @@ pub(crate) fn set_inline_optional_value_handler(
 ) -> Result<(), ConfigError> {
     let command = normalize_inline_handler_option(option, &data.root_name)?;
     let binding = make_value_binding(handler, description, ValueArity::Optional)?;
-    upsert_command(&mut data.commands, command, binding);
+    data.commands.insert_or_replace(command, binding);
     Ok(())
 }
 
@@ -128,15 +114,7 @@ pub(crate) fn set_alias<T: AsRef<str>>(
             .map(|token| token.as_ref().to_string())
             .collect(),
     };
-
-    for existing in data.aliases.iter_mut() {
-        if existing.alias == normalized_alias {
-            *existing = binding;
-            return Ok(());
-        }
-    }
-
-    data.aliases.push(binding);
+    data.aliases.insert(normalized_alias, binding);
     Ok(())
 }
 
@@ -148,7 +126,7 @@ pub(crate) fn set_primary_flag_handler(
 ) -> Result<(), ConfigError> {
     let command = normalize_primary_handler_option(option)?;
     let binding = make_flag_binding(handler, description)?;
-    upsert_command(&mut data.commands, command, binding);
+    data.commands.insert_or_replace(command, binding);
     Ok(())
 }
 
@@ -160,7 +138,7 @@ pub(crate) fn set_primary_value_handler(
 ) -> Result<(), ConfigError> {
     let command = normalize_primary_handler_option(option)?;
     let binding = make_value_binding(handler, description, ValueArity::Required)?;
-    upsert_command(&mut data.commands, command, binding);
+    data.commands.insert_or_replace(command, binding);
     Ok(())
 }
 
@@ -172,7 +150,7 @@ pub(crate) fn set_primary_optional_value_handler(
 ) -> Result<(), ConfigError> {
     let command = normalize_primary_handler_option(option)?;
     let binding = make_value_binding(handler, description, ValueArity::Optional)?;
-    upsert_command(&mut data.commands, command, binding);
+    data.commands.insert_or_replace(command, binding);
     Ok(())
 }
 
@@ -188,15 +166,13 @@ pub(crate) fn add_inline_parser(
     data: &mut ParserData,
     parser: InlineParserData,
 ) -> Result<(), ConfigError> {
-    for existing in &data.inline_parsers {
-        if existing.root_name == parser.root_name {
-            return Err(ConfigError::new(format!(
-                "kcli inline parser root '--{}' is already registered",
-                parser.root_name
-            )));
-        }
+    if data.inline_parsers.contains(&parser.root_name) {
+        return Err(ConfigError::new(format!(
+            "kcli inline parser root '--{}' is already registered",
+            parser.root_name
+        )));
     }
 
-    data.inline_parsers.push(parser);
+    data.inline_parsers.insert(parser);
     Ok(())
 }

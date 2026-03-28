@@ -3,12 +3,13 @@
 This page shows a few common `kcli` patterns. For complete compiling examples,
 also see:
 
-- [`../src/src/bin/bootstrap.rs`](../src/src/bin/bootstrap.rs)
-- [`../src/src/bin/sdk_alpha.rs`](../src/src/bin/sdk_alpha.rs)
-- [`../src/src/bin/sdk_beta.rs`](../src/src/bin/sdk_beta.rs)
-- [`../src/src/bin/sdk_gamma.rs`](../src/src/bin/sdk_gamma.rs)
-- [`../src/src/bin/core.rs`](../src/src/bin/core.rs)
-- [`../src/src/bin/omega.rs`](../src/src/bin/omega.rs)
+- [`../demo/bootstrap/src/main.rs`](../demo/bootstrap/src/main.rs)
+- [`../demo/sdk/alpha/src/lib.rs`](../demo/sdk/alpha/src/lib.rs)
+- [`../demo/sdk/alpha/src/main.rs`](../demo/sdk/alpha/src/main.rs)
+- [`../demo/sdk/beta/src/lib.rs`](../demo/sdk/beta/src/lib.rs)
+- [`../demo/sdk/gamma/src/lib.rs`](../demo/sdk/gamma/src/lib.rs)
+- [`../demo/exe/core/src/main.rs`](../demo/exe/core/src/main.rs)
+- [`../demo/exe/omega/src/main.rs`](../demo/exe/omega/src/main.rs)
 
 ## Minimal Executable
 

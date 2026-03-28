@@ -142,6 +142,11 @@ unknown option.
 The executable behavior is covered by:
 
 - [`../src/tests/api.rs`](../src/tests/api.rs)
-- [`../src/tests/demo_cli.rs`](../src/tests/demo_cli.rs)
+- [`../demo/bootstrap/tests/cli.rs`](../demo/bootstrap/tests/cli.rs)
+- [`../demo/sdk/alpha/tests/cli.rs`](../demo/sdk/alpha/tests/cli.rs)
+- [`../demo/sdk/beta/tests/cli.rs`](../demo/sdk/beta/tests/cli.rs)
+- [`../demo/sdk/gamma/tests/cli.rs`](../demo/sdk/gamma/tests/cli.rs)
+- [`../demo/exe/core/tests/cli.rs`](../demo/exe/core/tests/cli.rs)
+- [`../demo/exe/omega/tests/cli.rs`](../demo/exe/omega/tests/cli.rs)
 
 The demo programs under [`../demo/`](../demo/) show complete, compiling usage.

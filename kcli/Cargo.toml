@@ -1,0 +1,11 @@
+[workspace]
+members = [
+  "src",
+  "demo/bootstrap",
+  "demo/sdk/alpha",
+  "demo/sdk/beta",
+  "demo/sdk/gamma",
+  "demo/exe/core",
+  "demo/exe/omega",
+]
+resolver = "2"

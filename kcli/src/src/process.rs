@@ -7,16 +7,53 @@ use crate::normalize::starts_with;
 #[derive(Default)]
 struct ParseOutcome {
     ok: bool,
-    error_option: String,
-    error_message: String,
+    error: Option<ParseFailure>,
 }
 
 impl ParseOutcome {
     fn new() -> Self {
         Self {
             ok: true,
-            error_option: String::new(),
-            error_message: String::new(),
+            error: None,
+        }
+    }
+}
+
+enum ParseFailure {
+    AliasPresetsValuesForFlag { alias: String, option: String },
+    MissingRequiredValue { option: String },
+    UnknownRootValue { option: String },
+    UnknownOption { option: String },
+    HandlerFailed { option: String, message: String },
+}
+
+impl ParseFailure {
+    fn option(&self) -> &str {
+        match self {
+            Self::AliasPresetsValuesForFlag { alias, .. } => alias,
+            Self::MissingRequiredValue { option }
+            | Self::UnknownRootValue { option }
+            | Self::UnknownOption { option }
+            | Self::HandlerFailed { option, .. } => option,
+        }
+    }
+
+    fn render_message(&self) -> String {
+        match self {
+            Self::AliasPresetsValuesForFlag { alias, option } => format!(
+                "alias '{}' presets values for option '{}' which does not accept values",
+                alias, option
+            ),
+            Self::MissingRequiredValue { option } => format!("option '{option}' requires a value"),
+            Self::UnknownRootValue { option } => format!("unknown value for option '{option}'"),
+            Self::UnknownOption { option } => format!("unknown option {option}"),
+            Self::HandlerFailed { option, message } => {
+                if option.is_empty() {
+                    message.clone()
+                } else {
+                    format!("option '{option}': {message}")
+                }
+            }
         }
     }
 }
@@ -93,18 +130,10 @@ fn join_with_spaces(parts: &[String]) -> String {
     parts.join(" ")
 }
 
-fn format_option_error_message(option: &str, message: &str) -> String {
-    if option.is_empty() {
-        return message.to_string();
-    }
-    format!("option '{option}': {message}")
-}
-
-fn report_error(result: &mut ParseOutcome, option: &str, message: impl Into<String>) {
+fn report_error(result: &mut ParseOutcome, failure: ParseFailure) {
     if result.ok {
         result.ok = false;
-        result.error_option = option.to_string();
-        result.error_message = message.into();
+        result.error = Some(failure);
     }
 }
 
@@ -182,17 +211,14 @@ fn consume_index(consumed: &mut [bool], index: usize) {
 }
 
 fn find_command<'a>(
-    commands: &'a [(String, CommandBinding)],
+    commands: &'a crate::model::CommandTable,
     command: &str,
 ) -> Option<&'a CommandBinding> {
-    commands
-        .iter()
-        .find(|(existing_command, _)| existing_command == command)
-        .map(|(_, binding)| binding)
+    commands.get(command)
 }
 
 fn find_alias_binding<'a>(data: &'a ParserData, token: &str) -> Option<&'a AliasBinding> {
-    data.aliases.iter().find(|alias| alias.alias == token)
+    data.aliases.get(token)
 }
 
 fn has_alias_preset_tokens(alias_binding: Option<&AliasBinding>) -> bool {
@@ -206,8 +232,8 @@ fn build_effective_value_tokens(
     collected_parts: &[String],
 ) -> Vec<String> {
     let mut merged = Vec::new();
-    if let Some(binding) = alias_binding {
-        merged.extend(binding.preset_tokens.iter().cloned());
+    if let Some(alias) = alias_binding {
+        merged.extend(alias.preset_tokens.iter().cloned());
     }
     merged.extend(collected_parts.iter().cloned());
     merged
@@ -226,7 +252,7 @@ fn build_help_rows(parser: &InlineParserData) -> Vec<(String, String)> {
         rows.push((lhs, parser.root_value_description.clone()));
     }
 
-    for (command, binding) in &parser.commands {
+    for (command, binding) in parser.commands.iter() {
         let mut lhs = format!("{prefix}{command}");
         if binding.expects_value {
             match binding.value_arity {
@@ -241,7 +267,7 @@ fn build_help_rows(parser: &InlineParserData) -> Vec<(String, String)> {
 }
 
 fn match_inline_token<'a>(data: &'a ParserData, arg: &str) -> InlineTokenMatch<'a> {
-    for parser in &data.inline_parsers {
+    for parser in data.inline_parsers.iter() {
         let root_option = format!("--{}", parser.root_name);
         if arg == root_option {
             return InlineTokenMatch {
@@ -283,11 +309,10 @@ fn schedule_invocation(
             if !alias_binding.preset_tokens.is_empty() {
                 report_error(
                     result,
-                    &alias_binding.alias,
-                    format!(
-                        "alias '{}' presets values for option '{}' which does not accept values",
-                        alias_binding.alias, option_token
-                    ),
+                    ParseFailure::AliasPresetsValuesForFlag {
+                        alias: alias_binding.alias.clone(),
+                        option: option_token.to_string(),
+                    },
                 );
                 return index;
             }
@@ -318,8 +343,9 @@ fn schedule_invocation(
     {
         report_error(
             result,
-            option_token,
-            format!("option '{option_token}' requires a value"),
+            ParseFailure::MissingRequiredValue {
+                option: option_token.to_string(),
+            },
         );
         return index;
     }
@@ -434,8 +460,10 @@ fn execute_invocations(invocations: &[Invocation], result: &mut ParseOutcome) {
             };
             report_error(
                 result,
-                option,
-                format_option_error_message(option, &message),
+                ParseFailure::HandlerFailed {
+                    option: option.to_string(),
+                    message,
+                },
             );
         }
     }
@@ -497,8 +525,9 @@ fn plan_invocations(
                     } else if parser.root_value_handler.is_none() {
                         report_error(
                             result,
-                            effective_arg,
-                            format!("unknown value for option '{effective_arg}'"),
+                            ParseFailure::UnknownRootValue {
+                                option: effective_arg.to_string(),
+                            },
                         );
                     } else {
                         invocations.push(Invocation::Value {
@@ -593,7 +622,12 @@ fn report_unconsumed_option_tokens(
             continue;
         }
         if token.starts_with('-') {
-            report_error(result, token, format!("unknown option {token}"));
+            report_error(
+                result,
+                ParseFailure::UnknownOption {
+                    option: token.clone(),
+                },
+            );
             break;
         }
     }
@@ -615,6 +649,9 @@ pub(crate) fn parse_tokens(data: &ParserData, argv: &[String]) -> Result<(), Cli
     if result.ok {
         Ok(())
     } else {
-        Err(CliError::new(result.error_option, result.error_message))
+        let failure = result
+            .error
+            .expect("parse failure must carry error details");
+        Err(CliError::new(failure.option(), failure.render_message()))
     }
 }

@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use kcli::demo::alpha::get_inline_parser;
+use gamma::get_inline_parser;
 use kcli::Parser;
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -10,6 +10,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     parser.add_inline_parser(get_inline_parser()?)?;
     parser.parse_or_exit(&argv);
 
-    println!("KCLI rust alpha demo SDK check passed");
+    println!("KCLI rust gamma demo SDK check passed");
     Ok(())
 }

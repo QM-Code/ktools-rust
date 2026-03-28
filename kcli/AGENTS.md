@@ -10,7 +10,7 @@ Assume these have already been read:
 ## What This Repo Owns
 
 - Rust API and parsing behavior for `kcli`
-- Rust demo binaries and tests
+- Rust demo packages and tests
 - workspace `kbuild` integration for this repo
 
 ## Local Bootstrap
@@ -18,6 +18,9 @@ Assume these have already been read:
 Read:
 
 - `README.md`
+- `Cargo.toml`
 - `src/Cargo.toml`
 - `src/src/*`
 - `src/tests/*`
+- `demo/*/*/Cargo.toml`
+- `demo/*/*/src/*`

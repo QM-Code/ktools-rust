@@ -1,0 +1,14 @@
+[package]
+name = "kcli_demo_omega"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "omega"
+path = "src/main.rs"
+
+[dependencies]
+alpha = { package = "kcli_demo_alpha", path = "../../sdk/alpha" }
+beta = { package = "kcli_demo_beta", path = "../../sdk/beta" }
+gamma = { package = "kcli_demo_gamma", path = "../../sdk/gamma" }
+kcli = { path = "../../../src" }

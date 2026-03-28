@@ -64,8 +64,8 @@ python3 ../../kbuild/kbuild.py --build-latest
 Direct Cargo workflow:
 
 ```bash
-cd src
-cargo test
+cargo test --manifest-path Cargo.toml -p kcli
+cargo test --manifest-path demo/exe/core/Cargo.toml
 ```
 
 SDK staging after `kbuild --build-latest`:
@@ -104,8 +104,8 @@ Useful demo commands:
 
 ## Repository Layout
 
+- Cargo workspace: `Cargo.toml`
 - Public API: `src/src/lib.rs`
 - Parser implementation: `src/src/{backend,model,normalize,process}.rs`
-- Demo binaries: `src/src/bin/`
-- Shared demo helpers: `src/src/demo/`
+- Demo packages: `demo/{bootstrap,sdk/*,exe/*}/`
 - Behavior coverage: `src/tests/`
