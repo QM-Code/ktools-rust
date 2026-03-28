@@ -37,41 +37,29 @@ impl CollectedValues {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum InvocationKind {
-    Flag,
-    Value,
-    Positional,
-    PrintHelp,
-}
-
 #[derive(Clone)]
-struct Invocation {
-    kind: InvocationKind,
-    root: String,
-    option: String,
-    command: String,
-    value_tokens: Vec<String>,
-    flag_handler: Option<FlagHandler>,
-    value_handler: Option<ValueHandler>,
-    positional_handler: Option<PositionalHandler>,
-    help_rows: Vec<(String, String)>,
-}
-
-impl Default for Invocation {
-    fn default() -> Self {
-        Self {
-            kind: InvocationKind::Flag,
-            root: String::new(),
-            option: String::new(),
-            command: String::new(),
-            value_tokens: Vec::new(),
-            flag_handler: None,
-            value_handler: None,
-            positional_handler: None,
-            help_rows: Vec::new(),
-        }
-    }
+enum Invocation {
+    Flag {
+        root: String,
+        option: String,
+        command: String,
+        handler: FlagHandler,
+    },
+    Value {
+        root: String,
+        option: String,
+        command: String,
+        value_tokens: Vec<String>,
+        handler: ValueHandler,
+    },
+    Positional {
+        value_tokens: Vec<String>,
+        handler: PositionalHandler,
+    },
+    PrintHelp {
+        root: String,
+        help_rows: Vec<(String, String)>,
+    },
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -165,21 +153,20 @@ fn collect_value_tokens(
     collected
 }
 
-fn print_help(invocation: &Invocation) {
+fn print_help(root: &str, help_rows: &[(String, String)]) {
     println!();
-    println!("Available --{}-* options:", invocation.root);
+    println!("Available --{}-* options:", root);
 
-    let max_lhs = invocation
-        .help_rows
+    let max_lhs = help_rows
         .iter()
         .map(|(lhs, _)| lhs.len())
         .max()
         .unwrap_or(0);
 
-    if invocation.help_rows.is_empty() {
+    if help_rows.is_empty() {
         println!("  (no options registered)");
     } else {
-        for (lhs, rhs) in &invocation.help_rows {
+        for (lhs, rhs) in help_rows {
             let padding = max_lhs.saturating_sub(lhs.len());
             println!("  {lhs}{}{}", " ".repeat(padding + 2), rhs);
         }
@@ -291,13 +278,6 @@ fn schedule_invocation(
 ) -> usize {
     consume_index(consumed, index);
 
-    let mut invocation = Invocation {
-        root: root.to_string(),
-        option: option_token.to_string(),
-        command: command.to_string(),
-        ..Invocation::default()
-    };
-
     if !binding.expects_value {
         if let Some(alias_binding) = alias_binding {
             if !alias_binding.preset_tokens.is_empty() {
@@ -313,9 +293,15 @@ fn schedule_invocation(
             }
         }
 
-        invocation.kind = InvocationKind::Flag;
-        invocation.flag_handler = binding.flag_handler.clone();
-        invocations.push(invocation);
+        invocations.push(Invocation::Flag {
+            root: root.to_string(),
+            option: option_token.to_string(),
+            command: command.to_string(),
+            handler: binding
+                .flag_handler
+                .clone()
+                .expect("flag binding must carry a flag handler"),
+        });
         return index;
     }
 
@@ -343,10 +329,16 @@ fn schedule_invocation(
         final_index = collected.last_index;
     }
 
-    invocation.kind = InvocationKind::Value;
-    invocation.value_handler = binding.value_handler.clone();
-    invocation.value_tokens = build_effective_value_tokens(alias_binding, &collected.parts);
-    invocations.push(invocation);
+    invocations.push(Invocation::Value {
+        root: root.to_string(),
+        option: option_token.to_string(),
+        command: command.to_string(),
+        value_tokens: build_effective_value_tokens(alias_binding, &collected.parts),
+        handler: binding
+            .value_handler
+            .clone()
+            .expect("value binding must carry a value handler"),
+    });
     final_index
 }
 
@@ -364,11 +356,7 @@ fn schedule_positionals(
         return;
     }
 
-    let mut invocation = Invocation {
-        kind: InvocationKind::Positional,
-        positional_handler: Some(handler),
-        ..Invocation::default()
-    };
+    let mut value_tokens = Vec::new();
 
     for index in 1..tokens.len() {
         if consumed[index] {
@@ -378,12 +366,15 @@ fn schedule_positionals(
         let token = &tokens[index];
         if token.is_empty() || !token.starts_with('-') {
             consumed[index] = true;
-            invocation.value_tokens.push(token.clone());
+            value_tokens.push(token.clone());
         }
     }
 
-    if !invocation.value_tokens.is_empty() {
-        invocations.push(invocation);
+    if !value_tokens.is_empty() {
+        invocations.push(Invocation::Positional {
+            value_tokens,
+            handler,
+        });
     }
 }
 
@@ -393,64 +384,70 @@ fn execute_invocations(invocations: &[Invocation], result: &mut ParseOutcome) {
             return;
         }
 
-        if invocation.kind == InvocationKind::PrintHelp {
-            print_help(invocation);
-            continue;
-        }
-
-        let context = HandlerContext {
-            root: invocation.root.clone(),
-            option: invocation.option.clone(),
-            command: invocation.command.clone(),
-            value_tokens: invocation.value_tokens.clone(),
-        };
-
-        let execution = match invocation.kind {
-            InvocationKind::Flag => invocation
-                .flag_handler
-                .as_ref()
-                .map(|handler| handler(&context))
-                .unwrap_or_else(|| Err("kcli internal error: missing flag handler".to_string())),
-            InvocationKind::Value => {
-                let value = join_with_spaces(&invocation.value_tokens);
-                invocation
-                    .value_handler
-                    .as_ref()
-                    .map(|handler| handler(&context, &value))
-                    .unwrap_or_else(
-                        || Err("kcli internal error: missing value handler".to_string()),
-                    )
+        let execution = match invocation {
+            Invocation::Flag {
+                root,
+                option,
+                command,
+                handler,
+            } => handler(&HandlerContext {
+                root: root.clone(),
+                option: option.clone(),
+                command: command.clone(),
+                value_tokens: Vec::new(),
+            }),
+            Invocation::Value {
+                root,
+                option,
+                command,
+                value_tokens,
+                handler,
+            } => {
+                let context = HandlerContext {
+                    root: root.clone(),
+                    option: option.clone(),
+                    command: command.clone(),
+                    value_tokens: value_tokens.clone(),
+                };
+                handler(&context, &join_with_spaces(value_tokens))
             }
-            InvocationKind::Positional => invocation
-                .positional_handler
-                .as_ref()
-                .map(|handler| handler(&context))
-                .unwrap_or_else(|| {
-                    Err("kcli internal error: missing positional handler".to_string())
-                }),
-            InvocationKind::PrintHelp => Ok(()),
+            Invocation::Positional {
+                value_tokens,
+                handler,
+            } => handler(&HandlerContext {
+                root: String::new(),
+                option: String::new(),
+                command: String::new(),
+                value_tokens: value_tokens.clone(),
+            }),
+            Invocation::PrintHelp { root, help_rows } => {
+                print_help(root, help_rows);
+                Ok(())
+            }
         };
 
         if let Err(message) = execution {
+            let option = match invocation {
+                Invocation::Flag { option, .. } => option.as_str(),
+                Invocation::Value { option, .. } => option.as_str(),
+                Invocation::Positional { .. } | Invocation::PrintHelp { .. } => "",
+            };
             report_error(
                 result,
-                &invocation.option,
-                format_option_error_message(&invocation.option, &message),
+                option,
+                format_option_error_message(option, &message),
             );
         }
     }
 }
 
-pub(crate) fn parse_tokens(data: &ParserData, argv: &[String]) -> Result<(), CliError> {
-    if argv.is_empty() {
-        return Ok(());
-    }
-
-    let tokens = argv.to_vec();
-    let mut consumed = vec![false; tokens.len()];
+fn plan_invocations(
+    data: &ParserData,
+    tokens: &[String],
+    consumed: &mut [bool],
+    result: &mut ParseOutcome,
+) -> Vec<Invocation> {
     let mut invocations = Vec::new();
-    let mut result = ParseOutcome::new();
-
     let mut index = 1usize;
     while index < tokens.len() {
         if consumed[index] {
@@ -489,33 +486,33 @@ pub(crate) fn parse_tokens(data: &ParserData, argv: &[String]) -> Result<(), Cli
             match inline_match.kind {
                 InlineTokenKind::BareRoot => {
                     let parser = inline_match.parser.expect("bare root must have parser");
-                    consume_index(&mut consumed, index);
-                    let collected = collect_value_tokens(index, &tokens, &mut consumed, false);
+                    consume_index(consumed, index);
+                    let collected = collect_value_tokens(index, tokens, consumed, false);
 
                     if !collected.has_value && !has_alias_preset_tokens(alias_binding) {
-                        invocations.push(Invocation {
-                            kind: InvocationKind::PrintHelp,
+                        invocations.push(Invocation::PrintHelp {
                             root: parser.root_name.clone(),
                             help_rows: build_help_rows(parser),
-                            ..Invocation::default()
                         });
                     } else if parser.root_value_handler.is_none() {
                         report_error(
-                            &mut result,
+                            result,
                             effective_arg,
                             format!("unknown value for option '{effective_arg}'"),
                         );
                     } else {
-                        invocations.push(Invocation {
-                            kind: InvocationKind::Value,
+                        invocations.push(Invocation::Value {
                             root: parser.root_name.clone(),
                             option: effective_arg.to_string(),
-                            value_handler: parser.root_value_handler.clone(),
                             value_tokens: build_effective_value_tokens(
                                 alias_binding,
                                 &collected.parts,
                             ),
-                            ..Invocation::default()
+                            command: String::new(),
+                            handler: parser
+                                .root_value_handler
+                                .clone()
+                                .expect("root value handler must exist"),
                         });
                         if collected.has_value {
                             index = collected.last_index;
@@ -536,10 +533,10 @@ pub(crate) fn parse_tokens(data: &ParserData, argv: &[String]) -> Result<(), Cli
                                 &inline_match.suffix,
                                 effective_arg,
                                 index,
-                                &tokens,
-                                &mut consumed,
+                                tokens,
+                                consumed,
                                 &mut invocations,
-                                &mut result,
+                                result,
                             );
                         }
                     }
@@ -554,10 +551,10 @@ pub(crate) fn parse_tokens(data: &ParserData, argv: &[String]) -> Result<(), Cli
                             command,
                             effective_arg,
                             index,
-                            &tokens,
-                            &mut consumed,
+                            tokens,
+                            consumed,
                             &mut invocations,
-                            &mut result,
+                            result,
                         );
                     }
                 }
@@ -572,29 +569,48 @@ pub(crate) fn parse_tokens(data: &ParserData, argv: &[String]) -> Result<(), Cli
     }
 
     if result.ok {
-        schedule_positionals(data, &tokens, &mut consumed, &mut invocations);
+        schedule_positionals(data, tokens, consumed, &mut invocations);
+    }
+    invocations
+}
+
+fn report_unconsumed_option_tokens(
+    tokens: &[String],
+    consumed: &[bool],
+    result: &mut ParseOutcome,
+) {
+    if !result.ok {
+        return;
     }
 
-    if result.ok {
-        for index in 1..tokens.len() {
-            if consumed[index] {
-                continue;
-            }
+    for index in 1..tokens.len() {
+        if consumed[index] {
+            continue;
+        }
 
-            let token = &tokens[index];
-            if token.is_empty() {
-                continue;
-            }
-            if token.starts_with('-') {
-                report_error(&mut result, token, format!("unknown option {token}"));
-                break;
-            }
+        let token = &tokens[index];
+        if token.is_empty() {
+            continue;
+        }
+        if token.starts_with('-') {
+            report_error(result, token, format!("unknown option {token}"));
+            break;
         }
     }
+}
 
-    if result.ok {
-        execute_invocations(&invocations, &mut result);
+pub(crate) fn parse_tokens(data: &ParserData, argv: &[String]) -> Result<(), CliError> {
+    if argv.is_empty() {
+        return Ok(());
     }
+
+    let tokens = argv.to_vec();
+    let mut consumed = vec![false; tokens.len()];
+    let mut result = ParseOutcome::new();
+    let invocations = plan_invocations(data, &tokens, &mut consumed, &mut result);
+
+    report_unconsumed_option_tokens(&tokens, &consumed, &mut result);
+    execute_invocations(&invocations, &mut result);
 
     if result.ok {
         Ok(())
