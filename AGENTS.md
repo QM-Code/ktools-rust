@@ -33,4 +33,14 @@ The shared `kbuild` implementation currently lives in the sibling
 4. Read the relevant child repo `AGENTS.md` and `README.md` files before changing code in that repo.
 5. Prefer `kbuild` from `PATH` when available, or use the shared `../kbuild/kbuild.py` script from this workspace when the task depends on repo build behavior.
 
+## Git Sync
+
+Use the shared `kbuild` workflow for commit/push sync from this workspace root:
+
+```bash
+kbuild --git-sync "<message>"
+```
+
+Treat that as the standard sync command unless a more local doc explicitly
+overrides it.
 
