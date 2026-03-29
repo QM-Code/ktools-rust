@@ -23,7 +23,9 @@ directly:
 python3 ../kbuild/kbuild.py --help
 ```
 
-Each child repo also supports direct Cargo workflows from its `src/` directory.
+Each child repo also supports direct Cargo workflows. Repo-local Cargo config
+routes those outputs under this workspace's `build/` tree instead of leaving
+`target/` directories in the source repos.
 
 ## Where To Go Next
 

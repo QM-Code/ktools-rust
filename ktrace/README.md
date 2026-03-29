@@ -143,6 +143,9 @@ cd src
 cargo test
 ```
 
+Direct Cargo commands in this repo stage their `target` output under
+`../build/cargo/ktrace/`.
+
 SDK staging after `kbuild --build-latest`:
 
 - `build/latest/sdk/Cargo.toml`

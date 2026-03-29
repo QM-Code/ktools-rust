@@ -1,8 +1,6 @@
 # Generated build outputs
 /build/
 **/build/
-**/target/
-**/.cargo-home/
 
 # Python caches
 __pycache__/

@@ -68,6 +68,9 @@ cargo test --manifest-path Cargo.toml -p kcli
 cargo test --manifest-path demo/exe/core/Cargo.toml
 ```
 
+Direct Cargo commands in this repo stage their `target` output under
+`../build/cargo/kcli/`.
+
 SDK staging after `kbuild --build-latest`:
 
 - `build/latest/sdk/Cargo.toml`
