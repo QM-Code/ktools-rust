@@ -1,8 +1,10 @@
+#![allow(dead_code)]
+
 use std::sync::OnceLock;
 
-use crate::{color, TraceLogger, TraceResult, DEFAULT_COLOR};
+use ktrace::{color, TraceError, TraceLogger, DEFAULT_COLOR};
 
-pub fn get_trace_logger() -> TraceResult<TraceLogger> {
+pub fn get_trace_logger() -> Result<TraceLogger, TraceError> {
     static TRACE: OnceLock<TraceLogger> = OnceLock::new();
 
     if let Some(trace) = TRACE.get() {
@@ -23,7 +25,7 @@ pub fn get_trace_logger() -> TraceResult<TraceLogger> {
     Ok(TRACE.get().cloned().unwrap_or(trace))
 }
 
-pub fn test_trace_logging_channels() -> TraceResult<()> {
+pub fn test_trace_logging_channels() -> Result<(), TraceError> {
     let trace = get_trace_logger()?;
     trace.trace("net", "testing...")?;
     trace.trace("net.alpha", "testing...")?;
@@ -37,7 +39,7 @@ pub fn test_trace_logging_channels() -> TraceResult<()> {
     Ok(())
 }
 
-pub fn test_standard_logging_channels() -> TraceResult<()> {
+pub fn test_standard_logging_channels() -> Result<(), TraceError> {
     let trace = get_trace_logger()?;
     trace.info("testing...")?;
     trace.warn("testing...")?;

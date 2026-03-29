@@ -23,3 +23,6 @@ Read:
 - `tests/*`
 - `demo/*/*/Cargo.toml`
 - `demo/*/*/src/*`
+
+After a coherent batch of changes in `ktools-rust/kcli/`, return to the
+`ktools-rust/` workspace root and run `kbuild --git-sync "<message>"`.

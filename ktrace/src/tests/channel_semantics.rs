@@ -1,5 +1,6 @@
 mod common;
 
+use common::capture_stdout;
 use ktrace::{color, Logger, TraceLogger};
 
 fn add_test_channels(logger: &Logger) -> Result<(), Box<dyn std::error::Error>> {
@@ -70,5 +71,23 @@ fn duplicate_namespaces_merge_but_conflicting_colors_fail() -> Result<(), Box<dy
     assert!(error
         .to_string()
         .contains("conflicting trace color for 'tests.net'"));
+    Ok(())
+}
+
+#[test]
+fn unmatched_selector_lists_warn_but_do_not_enable_phantom_channels(
+) -> Result<(), Box<dyn std::error::Error>> {
+    let logger = Logger::new();
+    add_test_channels(&logger)?;
+
+    let output = capture_stdout(|| {
+        logger
+            .enable_channels("tests.missing.child", "tests")
+            .expect("unmatched selector should only warn");
+    });
+
+    assert!(output.contains("[tests] [warning]"));
+    assert!(output.contains("matched no registered channels"));
+    assert!(!logger.should_trace_channel("tests.missing.child", ""));
     Ok(())
 }

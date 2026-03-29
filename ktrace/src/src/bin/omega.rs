@@ -1,19 +1,13 @@
 use std::error::Error;
 
-use ktrace::demo::alpha::{
-    get_trace_logger as get_alpha_trace_logger,
-    test_standard_logging_channels as test_alpha_standard_logging_channels,
-    test_trace_logging_channels as test_alpha_trace_logging_channels,
-};
-use ktrace::demo::beta::{
-    get_trace_logger as get_beta_trace_logger,
-    test_trace_logging_channels as test_beta_trace_logging_channels,
-};
-use ktrace::demo::gamma::{
-    get_trace_logger as get_gamma_trace_logger,
-    test_trace_logging_channels as test_gamma_trace_logging_channels,
-};
 use ktrace::{ktrace_trace, Logger, TraceLogger};
+
+#[path = "support/sdk_alpha.rs"]
+mod sdk_alpha_support;
+#[path = "support/sdk_beta.rs"]
+mod sdk_beta_support;
+#[path = "support/sdk_gamma.rs"]
+mod sdk_gamma_support;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let argv = std::env::args().collect::<Vec<_>>();
@@ -26,9 +20,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     app_trace.add_channel("deep.branch", ktrace::DEFAULT_COLOR)?;
     app_trace.add_channel("deep.branch.leaf", ktrace::color("LightSalmon1")?)?;
 
-    let alpha_trace = get_alpha_trace_logger()?;
-    let beta_trace = get_beta_trace_logger()?;
-    let gamma_trace = get_gamma_trace_logger()?;
+    let alpha_trace = sdk_alpha_support::get_trace_logger()?;
+    let beta_trace = sdk_beta_support::get_trace_logger()?;
+    let gamma_trace = sdk_gamma_support::get_trace_logger()?;
 
     logger.add_trace_logger(app_trace.clone())?;
     logger.add_trace_logger(alpha_trace.clone())?;
@@ -58,10 +52,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         "deep.branch.leaf",
         "omega trace test on channel 'deep.branch.leaf'"
     )?;
-    test_alpha_trace_logging_channels()?;
-    test_beta_trace_logging_channels()?;
-    test_gamma_trace_logging_channels()?;
-    test_alpha_standard_logging_channels()?;
+    sdk_alpha_support::test_trace_logging_channels()?;
+    sdk_beta_support::test_trace_logging_channels()?;
+    sdk_gamma_support::test_trace_logging_channels()?;
+    sdk_alpha_support::test_standard_logging_channels()?;
     app_trace.trace("orchestrator", "omega completed imported SDK trace checks")?;
     app_trace.info("testing...")?;
     app_trace.warn("testing...")?;

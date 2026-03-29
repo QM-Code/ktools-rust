@@ -1,6 +1,5 @@
 mod cli;
 mod colors;
-pub mod demo;
 mod format;
 mod registry;
 mod selectors;

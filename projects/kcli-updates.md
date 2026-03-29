@@ -2,9 +2,8 @@
 
 ## Mission
 
-Bring `ktools-rust/kcli/` structurally up to the C++ reference while preserving
-Rust idioms. The current repo is functional, but its workspace/crate layout is
-the most awkward non-Swift layout in the stack.
+Keep `ktools-rust/kcli/` structurally simple and fully parity-audited while
+preserving Rust-idiomatic API and error handling.
 
 ## Required Reading
 
@@ -18,50 +17,46 @@ the most awkward non-Swift layout in the stack.
 
 ## Current Gaps
 
-- The repo root is a Cargo workspace, but the main crate lives in `kcli/src/`.
-- Source files live under `kcli/src/src/`, which is awkward to navigate.
-- Tests live under `kcli/src/tests/` instead of a more obvious top-level test
-  location.
-- `kcli/src/src/process.rs` is very large.
-- The repo needs a deliberate parity check against the C++ behavior contract.
+- `kcli/src/process/plan.rs` is still the largest parser module.
+- API behavior coverage is still concentrated in a single `tests/api.rs` file.
+- Demo crates and their validation flow should be treated as part of the
+  contract, not just supporting examples.
+- Docs and manifests should be rechecked so the flattened layout stays easy to
+  understand.
 
 ## Work Plan
 
-1. Flatten the crate layout.
-- Move toward a more normal Rust shape where the main crate lives at the repo
-  root or, at minimum, remove the `src/src` awkwardness.
-- Make the top-level file layout clearly communicate workspace members versus
-  the main library crate.
-- Keep demo crates intact unless the workspace layout itself becomes clearer by
-  moving them.
-
-2. Split oversized parser implementation files.
-- Break `process.rs` into coherent modules if that improves readability.
+1. Revisit the largest parser module.
+- Review whether `src/process/plan.rs` should be split further into smaller,
+  coherent pieces.
 - Keep public API exposure centralized and easy to follow.
-- Preserve the current good separation around normalization/model/backend unless
-  a cleaner split is obvious.
 
-3. Improve test discoverability.
-- Move or reorganize tests so API tests are found where a Rust reviewer expects
-  them.
-- Preserve the existing demo crate tests, since those are strong end-to-end
-  checks.
+2. Improve test discoverability.
+- Consider splitting `tests/api.rs` by concern if that would make failures
+  easier to localize.
+- Preserve the current strong behavior coverage while making it easier to scan.
 
-4. Audit behavior parity with C++.
-- Confirm matching semantics for aliases, bare inline roots, required and
-  optional values, help output, and error behavior.
-- Add focused tests for any reference behavior that is currently implicit.
+3. Re-audit parity with C++.
+- Verify aliases, bare inline roots, required/optional values, help output,
+  double-dash rejection, and error behavior against the C++ docs/tests.
+- Add focused tests for any reference behavior that is still implicit.
 
-5. Review docs and demos after the structural cleanup.
-- Keep the bootstrap/sdk/exe demo roles aligned with C++.
-- Ensure the README and source layout agree after any workspace restructuring.
+4. Treat demo crates as contract checks.
+- Re-run and review `demo/bootstrap`, `demo/sdk/{alpha,beta,gamma}`, and
+  `demo/exe/{core,omega}` as part of the project, not just the library crate.
+- Make sure README text and demo manifests still tell the same story.
+
+5. Keep hygiene rules tight.
+- Ensure `target/`, `.cargo-home/`, and staged build directories remain out of
+  version control.
+- Avoid reintroducing layout confusion after the flattening work.
 
 ## Constraints
 
 - Preserve Rust-idiomatic API usage and error handling.
-- Do not break the demo crate structure unless the replacement is clearly
+- Do not disturb the demo crate structure unless the replacement is clearly
   better.
-- Prefer real layout simplification over cosmetic renaming.
+- Prefer real clarity improvements over cosmetic renaming.
 
 ## Validation
 
@@ -72,7 +67,6 @@ the most awkward non-Swift layout in the stack.
 
 ## Done When
 
-- The main crate layout no longer feels nested or surprising.
-- Oversized parser internals are split into clearer modules.
-- A Rust reviewer can compare the repo to C++ without first decoding the
-  workspace layout.
+- The parser internals are easy to navigate.
+- Tests and demo crates cover the reference behavior directly.
+- The repo layout remains unsurprising to a Rust reviewer.

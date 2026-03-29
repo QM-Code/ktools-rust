@@ -6,6 +6,13 @@ fn print_blank_line() {
     println!();
 }
 
+fn print_example_line(option_root: &str, selector: &str, description: Option<&str>) {
+    match description {
+        Some(description) => println!("  {option_root} '{selector}' {description}"),
+        None => println!("  {option_root} '{selector}'"),
+    }
+}
+
 fn update_output_options<F>(logger: &Logger, update: F) -> Result<(), String>
 where
     F: FnOnce(&mut OutputOptions),
@@ -59,15 +66,84 @@ impl Logger {
                 );
                 print_blank_line();
                 println!("Trace selector examples:");
-                println!("  {} '.abc'", option_root);
-                println!("  {} 'otherapp.channel'", option_root);
-                println!("  {} '*.*'", option_root);
-                println!("  {} '*.*.*'", option_root);
-                println!("  {} '*.*.*.*'", option_root);
-                println!("  {} 'alpha.*'", option_root);
-                println!("  {} 'alpha.*.*.*'", option_root);
-                println!("  {} '*.net'", option_root);
-                println!("  {} '*.{{net,io}}'", option_root);
+                print_example_line(
+                    &option_root,
+                    ".abc",
+                    Some("Select local 'abc' in current namespace"),
+                );
+                print_example_line(
+                    &option_root,
+                    ".abc.xyz",
+                    Some("Select local nested channel in current namespace"),
+                );
+                print_example_line(
+                    &option_root,
+                    "otherapp.channel",
+                    Some("Select explicit namespace channel"),
+                );
+                print_example_line(
+                    &option_root,
+                    "*.*",
+                    Some("Select all <namespace>.<channel> channels"),
+                );
+                print_example_line(
+                    &option_root,
+                    "*.*.*",
+                    Some("Select all channels up to 2 levels"),
+                );
+                print_example_line(
+                    &option_root,
+                    "*.*.*.*",
+                    Some("Select all channels up to 3 levels"),
+                );
+                print_example_line(
+                    &option_root,
+                    "alpha.*",
+                    Some("Select all top-level channels in alpha"),
+                );
+                print_example_line(
+                    &option_root,
+                    "alpha.*.*",
+                    Some("Select all channels in alpha (up to 2 levels)"),
+                );
+                print_example_line(
+                    &option_root,
+                    "alpha.*.*.*",
+                    Some("Select all channels in alpha (up to 3 levels)"),
+                );
+                print_example_line(
+                    &option_root,
+                    "*.net",
+                    Some("Select 'net' across all namespaces"),
+                );
+                print_example_line(
+                    &option_root,
+                    "*.scheduler.tick",
+                    Some("Select 'scheduler.tick' across namespaces"),
+                );
+                print_example_line(
+                    &option_root,
+                    "*.net.*",
+                    Some("Select subchannels under 'net' across namespaces"),
+                );
+                print_example_line(
+                    &option_root,
+                    "*.{net,io}",
+                    Some("Select 'net' and 'io' across all namespaces"),
+                );
+                print_example_line(
+                    &option_root,
+                    "{alpha,beta}.*",
+                    Some("Select all top-level channels in alpha and beta"),
+                );
+                print_example_line(&option_root, "alpha.net", None);
+                print_example_line(&option_root, "beta.scheduler.tick", None);
+                print_example_line(&option_root, "alpha.net,beta.io", None);
+                print_example_line(&option_root, "gamma.physics.*", None);
+                print_example_line(&option_root, "gamma.physics.*.*", None);
+                print_example_line(&option_root, "alpha.{net,cache}", None);
+                print_example_line(&option_root, "beta.{io,scheduler}.packet", None);
+                print_example_line(&option_root, "{alpha,beta}.net", None);
                 print_blank_line();
                 Ok(())
             },

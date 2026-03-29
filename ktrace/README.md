@@ -182,5 +182,5 @@ Useful demo commands:
 - Public API: `src/src/lib.rs`
 - Color catalog: `src/src/colors.rs`
 - Demo binaries: `src/src/bin/`
-- Shared demo helpers: `src/src/demo/`
+- Demo-owned support modules: `src/src/bin/support/sdk_{alpha,beta,gamma}.rs`
 - Behavior coverage: `src/tests/`

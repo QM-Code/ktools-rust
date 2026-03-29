@@ -8,7 +8,7 @@ name = "ktrace"
 path = "src/lib.rs"
 
 [dependencies]
-kcli = { path = "../../kcli/src" }
+kcli = { path = "../../kcli" }
 
 [dev-dependencies]
 libc = "0.2"

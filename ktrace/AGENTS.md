@@ -28,3 +28,6 @@ Read:
 - Use `kbuild --build-latest` from this repo root for normal builds.
 - Use `cargo test` inside `src/` for crate-level iteration when needed.
 - Keep behavior aligned with the cross-language `ktrace` model unless there is a strong Rust-specific reason not to.
+
+After a coherent batch of changes in `ktools-rust/ktrace/`, return to the
+`ktools-rust/` workspace root and run `kbuild --git-sync "<message>"`.

@@ -1,10 +1,9 @@
 use std::error::Error;
 
-use ktrace::demo::alpha::{
-    get_trace_logger as get_alpha_trace_logger,
-    test_trace_logging_channels as test_alpha_trace_logging_channels,
-};
 use ktrace::{ktrace_info, ktrace_trace, Logger, TraceLogger};
+
+#[path = "support/sdk_alpha.rs"]
+mod sdk_alpha_support;
 
 fn executable_name(path: Option<&str>) -> &str {
     match path {
@@ -21,7 +20,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let app_trace = TraceLogger::new("core")?;
     app_trace.add_channel("app", ktrace::color("BrightCyan")?)?;
     app_trace.add_channel("startup", ktrace::color("BrightYellow")?)?;
-    let alpha_trace = get_alpha_trace_logger()?;
+    let alpha_trace = sdk_alpha_support::get_trace_logger()?;
 
     logger.add_trace_logger(app_trace.clone())?;
     logger.add_trace_logger(alpha_trace)?;
@@ -43,7 +42,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         "startup",
         "testing imported tracing, use --trace '*.*' to view imported channels"
     )?;
-    test_alpha_trace_logging_channels()?;
+    sdk_alpha_support::test_trace_logging_channels()?;
     ktrace_info!(
         app_trace,
         "KTRACE rust demo core import/integration check passed"
