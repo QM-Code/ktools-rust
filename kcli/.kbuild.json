@@ -8,7 +8,7 @@
     "auth": "git@github.com:QM-Code/kcli-rust.git"
   },
   "cargo": {
-    "manifest": "src/Cargo.toml",
+    "manifest": "Cargo.toml",
     "package": "kcli",
     "tests": true,
     "sdk": {

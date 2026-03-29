@@ -1,126 +1,12 @@
 use crate::model::{
-    AliasBinding, CliError, CommandBinding, FlagHandler, HandlerContext, InlineParserData,
-    ParserData, PositionalHandler, ValueArity, ValueHandler,
+    AliasBinding, CommandBinding, CommandTable, HandlerContext, ParserData, ValueArity,
 };
 use crate::normalize::starts_with;
 
-#[derive(Default)]
-struct ParseOutcome {
-    ok: bool,
-    error: Option<ParseFailure>,
-}
-
-impl ParseOutcome {
-    fn new() -> Self {
-        Self {
-            ok: true,
-            error: None,
-        }
-    }
-}
-
-enum ParseFailure {
-    AliasPresetsValuesForFlag { alias: String, option: String },
-    MissingRequiredValue { option: String },
-    UnknownRootValue { option: String },
-    UnknownOption { option: String },
-    HandlerFailed { option: String, message: String },
-}
-
-impl ParseFailure {
-    fn option(&self) -> &str {
-        match self {
-            Self::AliasPresetsValuesForFlag { alias, .. } => alias,
-            Self::MissingRequiredValue { option }
-            | Self::UnknownRootValue { option }
-            | Self::UnknownOption { option }
-            | Self::HandlerFailed { option, .. } => option,
-        }
-    }
-
-    fn render_message(&self) -> String {
-        match self {
-            Self::AliasPresetsValuesForFlag { alias, option } => format!(
-                "alias '{}' presets values for option '{}' which does not accept values",
-                alias, option
-            ),
-            Self::MissingRequiredValue { option } => format!("option '{option}' requires a value"),
-            Self::UnknownRootValue { option } => format!("unknown value for option '{option}'"),
-            Self::UnknownOption { option } => format!("unknown option {option}"),
-            Self::HandlerFailed { option, message } => {
-                if option.is_empty() {
-                    message.clone()
-                } else {
-                    format!("option '{option}': {message}")
-                }
-            }
-        }
-    }
-}
-
-struct CollectedValues {
-    has_value: bool,
-    parts: Vec<String>,
-    last_index: usize,
-}
-
-impl CollectedValues {
-    fn new(option_index: usize) -> Self {
-        Self {
-            has_value: false,
-            parts: Vec::new(),
-            last_index: option_index,
-        }
-    }
-}
-
-#[derive(Clone)]
-enum Invocation {
-    Flag {
-        root: String,
-        option: String,
-        command: String,
-        handler: FlagHandler,
-    },
-    Value {
-        root: String,
-        option: String,
-        command: String,
-        value_tokens: Vec<String>,
-        handler: ValueHandler,
-    },
-    Positional {
-        value_tokens: Vec<String>,
-        handler: PositionalHandler,
-    },
-    PrintHelp {
-        root: String,
-        help_rows: Vec<(String, String)>,
-    },
-}
-
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum InlineTokenKind {
-    None,
-    BareRoot,
-    DashOption,
-}
-
-struct InlineTokenMatch<'a> {
-    kind: InlineTokenKind,
-    parser: Option<&'a InlineParserData>,
-    suffix: String,
-}
-
-impl<'a> Default for InlineTokenMatch<'a> {
-    fn default() -> Self {
-        Self {
-            kind: InlineTokenKind::None,
-            parser: None,
-            suffix: String::new(),
-        }
-    }
-}
+use super::help::{build_help_rows, print_help};
+use super::state::{
+    CollectedValues, InlineTokenKind, InlineTokenMatch, Invocation, ParseFailure, ParseOutcome,
+};
 
 fn is_collectable_follow_on_value_token(value: &str) -> bool {
     !value.starts_with('-')
@@ -182,38 +68,13 @@ fn collect_value_tokens(
     collected
 }
 
-fn print_help(root: &str, help_rows: &[(String, String)]) {
-    println!();
-    println!("Available --{}-* options:", root);
-
-    let max_lhs = help_rows
-        .iter()
-        .map(|(lhs, _)| lhs.len())
-        .max()
-        .unwrap_or(0);
-
-    if help_rows.is_empty() {
-        println!("  (no options registered)");
-    } else {
-        for (lhs, rhs) in help_rows {
-            let padding = max_lhs.saturating_sub(lhs.len());
-            println!("  {lhs}{}{}", " ".repeat(padding + 2), rhs);
-        }
-    }
-
-    println!();
-}
-
 fn consume_index(consumed: &mut [bool], index: usize) {
     if index < consumed.len() && !consumed[index] {
         consumed[index] = true;
     }
 }
 
-fn find_command<'a>(
-    commands: &'a crate::model::CommandTable,
-    command: &str,
-) -> Option<&'a CommandBinding> {
+fn find_command<'a>(commands: &'a CommandTable, command: &str) -> Option<&'a CommandBinding> {
     commands.get(command)
 }
 
@@ -237,33 +98,6 @@ fn build_effective_value_tokens(
     }
     merged.extend(collected_parts.iter().cloned());
     merged
-}
-
-fn build_help_rows(parser: &InlineParserData) -> Vec<(String, String)> {
-    let prefix = format!("--{}-", parser.root_name);
-    let mut rows = Vec::new();
-
-    if parser.root_value_handler.is_some() && !parser.root_value_description.is_empty() {
-        let mut lhs = format!("--{}", parser.root_name);
-        if !parser.root_value_placeholder.is_empty() {
-            lhs.push(' ');
-            lhs.push_str(&parser.root_value_placeholder);
-        }
-        rows.push((lhs, parser.root_value_description.clone()));
-    }
-
-    for (command, binding) in parser.commands.iter() {
-        let mut lhs = format!("{prefix}{command}");
-        if binding.expects_value {
-            match binding.value_arity {
-                ValueArity::Optional => lhs.push_str(" [value]"),
-                ValueArity::Required => lhs.push_str(" <value>"),
-            }
-        }
-        rows.push((lhs, binding.description.clone()));
-    }
-
-    rows
 }
 
 fn match_inline_token<'a>(data: &'a ParserData, arg: &str) -> InlineTokenMatch<'a> {
@@ -404,7 +238,7 @@ fn schedule_positionals(
     }
 }
 
-fn execute_invocations(invocations: &[Invocation], result: &mut ParseOutcome) {
+pub(crate) fn execute_invocations(invocations: &[Invocation], result: &mut ParseOutcome) {
     for invocation in invocations {
         if !result.ok {
             return;
@@ -469,7 +303,7 @@ fn execute_invocations(invocations: &[Invocation], result: &mut ParseOutcome) {
     }
 }
 
-fn plan_invocations(
+pub(crate) fn plan_invocations(
     data: &ParserData,
     tokens: &[String],
     consumed: &mut [bool],
@@ -533,11 +367,11 @@ fn plan_invocations(
                         invocations.push(Invocation::Value {
                             root: parser.root_name.clone(),
                             option: effective_arg.to_string(),
+                            command: String::new(),
                             value_tokens: build_effective_value_tokens(
                                 alias_binding,
                                 &collected.parts,
                             ),
-                            command: String::new(),
                             handler: parser
                                 .root_value_handler
                                 .clone()
@@ -603,7 +437,7 @@ fn plan_invocations(
     invocations
 }
 
-fn report_unconsumed_option_tokens(
+pub(crate) fn report_unconsumed_option_tokens(
     tokens: &[String],
     consumed: &[bool],
     result: &mut ParseOutcome,
@@ -630,28 +464,5 @@ fn report_unconsumed_option_tokens(
             );
             break;
         }
-    }
-}
-
-pub(crate) fn parse_tokens(data: &ParserData, argv: &[String]) -> Result<(), CliError> {
-    if argv.is_empty() {
-        return Ok(());
-    }
-
-    let tokens = argv.to_vec();
-    let mut consumed = vec![false; tokens.len()];
-    let mut result = ParseOutcome::new();
-    let invocations = plan_invocations(data, &tokens, &mut consumed, &mut result);
-
-    report_unconsumed_option_tokens(&tokens, &consumed, &mut result);
-    execute_invocations(&invocations, &mut result);
-
-    if result.ok {
-        Ok(())
-    } else {
-        let failure = result
-            .error
-            .expect("parse failure must carry error details");
-        Err(CliError::new(failure.option(), failure.render_message()))
     }
 }

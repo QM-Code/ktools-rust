@@ -94,6 +94,6 @@ If you want complete, compiling examples, start with:
 - [`../demo/sdk/gamma/src/lib.rs`](../demo/sdk/gamma/src/lib.rs)
 - [`../demo/exe/core/src/main.rs`](../demo/exe/core/src/main.rs)
 - [`../demo/exe/omega/src/main.rs`](../demo/exe/omega/src/main.rs)
-- [`../src/tests/api.rs`](../src/tests/api.rs)
+- [`../tests/api.rs`](../tests/api.rs)
 
-The public API contract lives in [`../src/src/lib.rs`](../src/src/lib.rs).
+The public API contract lives in [`../src/lib.rs`](../src/lib.rs).

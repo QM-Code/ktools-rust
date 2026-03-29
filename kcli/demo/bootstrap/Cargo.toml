@@ -8,4 +8,4 @@ name = "bootstrap"
 path = "src/main.rs"
 
 [dependencies]
-kcli = { path = "../../src" }
+kcli = { path = "../.." }

@@ -11,4 +11,4 @@ path = "src/main.rs"
 alpha = { package = "kcli_demo_alpha", path = "../../sdk/alpha" }
 beta = { package = "kcli_demo_beta", path = "../../sdk/beta" }
 gamma = { package = "kcli_demo_gamma", path = "../../sdk/gamma" }
-kcli = { path = "../../../src" }
+kcli = { path = "../../../" }

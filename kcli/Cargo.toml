@@ -1,6 +1,10 @@
+[package]
+name = "kcli"
+version = "0.1.0"
+edition = "2021"
+
 [workspace]
 members = [
-  "src",
   "demo/bootstrap",
   "demo/sdk/alpha",
   "demo/sdk/beta",

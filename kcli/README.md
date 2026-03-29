@@ -105,7 +105,7 @@ Useful demo commands:
 ## Repository Layout
 
 - Cargo workspace: `Cargo.toml`
-- Public API: `src/src/lib.rs`
-- Parser implementation: `src/src/{backend,model,normalize,process}.rs`
+- Public API: `src/lib.rs`
+- Parser implementation: `src/{backend,model,normalize,process/}`
 - Demo packages: `demo/{bootstrap,sdk/*,exe/*}/`
-- Behavior coverage: `src/tests/`
+- Behavior coverage: `tests/`

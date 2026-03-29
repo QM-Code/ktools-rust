@@ -141,7 +141,7 @@ unknown option.
 
 The executable behavior is covered by:
 
-- [`../src/tests/api.rs`](../src/tests/api.rs)
+- [`../tests/api.rs`](../tests/api.rs)
 - [`../demo/bootstrap/tests/cli.rs`](../demo/bootstrap/tests/cli.rs)
 - [`../demo/sdk/alpha/tests/cli.rs`](../demo/sdk/alpha/tests/cli.rs)
 - [`../demo/sdk/beta/tests/cli.rs`](../demo/sdk/beta/tests/cli.rs)

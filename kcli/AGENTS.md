@@ -19,8 +19,7 @@ Read:
 
 - `README.md`
 - `Cargo.toml`
-- `src/Cargo.toml`
-- `src/src/*`
-- `src/tests/*`
+- `src/*`
+- `tests/*`
 - `demo/*/*/Cargo.toml`
 - `demo/*/*/src/*`

@@ -1,7 +1,7 @@
 # API Guide
 
 This page summarizes the public types in
-[`../src/src/lib.rs`](../src/src/lib.rs).
+[`../src/lib.rs`](../src/lib.rs).
 
 ## Core Types
 

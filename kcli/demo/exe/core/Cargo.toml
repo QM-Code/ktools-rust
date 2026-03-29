@@ -9,4 +9,4 @@ path = "src/main.rs"
 
 [dependencies]
 alpha = { package = "kcli_demo_alpha", path = "../../sdk/alpha" }
-kcli = { path = "../../../src" }
+kcli = { path = "../../../" }
