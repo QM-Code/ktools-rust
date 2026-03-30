@@ -48,3 +48,96 @@ pub(crate) fn print_help(root: &str, help_rows: &[(String, String)]) {
 
     println!();
 }
+
+#[cfg(test)]
+mod tests {
+    use std::sync::Arc;
+
+    use crate::backend::{
+        set_inline_flag_handler, set_inline_root, set_inline_value_handler,
+        set_root_value_handler_with_help,
+    };
+    use crate::model::{HandlerContext, HandlerResult, InlineParserData};
+
+    use super::build_help_rows;
+
+    fn noop_flag(_context: &HandlerContext) -> HandlerResult {
+        Ok(())
+    }
+
+    fn noop_value(_context: &HandlerContext, _value: &str) -> HandlerResult {
+        Ok(())
+    }
+
+    #[test]
+    fn help_rows_include_registered_inline_options() -> Result<(), Box<dyn std::error::Error>> {
+        let mut parser = InlineParserData::default();
+        set_inline_root(&mut parser, "build")?;
+        set_inline_flag_handler(
+            &mut parser,
+            "-flag",
+            Arc::new(noop_flag),
+            "Enable build flag.",
+        )?;
+        set_inline_value_handler(
+            &mut parser,
+            "-value",
+            Arc::new(noop_value),
+            "Set build value.",
+        )?;
+
+        let rows = build_help_rows(&parser);
+
+        assert_eq!(
+            rows,
+            vec![
+                (
+                    "--build-flag".to_string(),
+                    "Enable build flag.".to_string(),
+                ),
+                (
+                    "--build-value <value>".to_string(),
+                    "Set build value.".to_string(),
+                ),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn help_rows_include_root_value_help_when_present(
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let mut parser = InlineParserData::default();
+        set_inline_root(&mut parser, "build")?;
+        set_root_value_handler_with_help(
+            &mut parser,
+            Arc::new(noop_value),
+            "<selector>",
+            "Select build targets.",
+        )?;
+        set_inline_flag_handler(
+            &mut parser,
+            "-flag",
+            Arc::new(noop_flag),
+            "Enable build flag.",
+        )?;
+
+        let rows = build_help_rows(&parser);
+
+        assert_eq!(
+            rows[0],
+            (
+                "--build <selector>".to_string(),
+                "Select build targets.".to_string(),
+            )
+        );
+        assert_eq!(
+            rows[1],
+            (
+                "--build-flag".to_string(),
+                "Enable build flag.".to_string(),
+            )
+        );
+        Ok(())
+    }
+}

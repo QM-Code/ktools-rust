@@ -49,7 +49,7 @@ parser.parse(&argv)?;
 
 ## Build
 
-From this repo root:
+From this component root:
 
 ```bash
 kbuild --build-latest
@@ -68,7 +68,7 @@ cargo test --manifest-path Cargo.toml -p kcli
 cargo test --manifest-path demo/exe/core/Cargo.toml
 ```
 
-Direct Cargo commands in this repo stage their `target` output under
+Direct Cargo commands in this component stage their `target` output under
 `../build/cargo/kcli/`.
 
 SDK staging after `kbuild --build-latest`:
@@ -105,7 +105,7 @@ Useful demo commands:
 ./demo/exe/omega/build/latest/omega --newgamma-tag "prod"
 ```
 
-## Repository Layout
+## Component Layout
 
 - Cargo workspace: `Cargo.toml`
 - Public API: `src/lib.rs`

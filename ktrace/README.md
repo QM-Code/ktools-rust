@@ -124,7 +124,7 @@ List APIs on `Logger`:
 
 ## Build
 
-From this repo root:
+From this component root:
 
 ```bash
 kbuild --build-latest
@@ -143,7 +143,7 @@ cd src
 cargo test
 ```
 
-Direct Cargo commands in this repo stage their `target` output under
+Direct Cargo commands in this component stage their `target` output under
 `../build/cargo/ktrace/`.
 
 SDK staging after `kbuild --build-latest`:
@@ -180,7 +180,7 @@ Useful demo commands:
 ./demo/exe/omega/build/latest/omega --trace-colors
 ```
 
-## Repository Layout
+## Component Layout
 
 - Public API: `src/src/lib.rs`
 - Color catalog: `src/src/colors.rs`

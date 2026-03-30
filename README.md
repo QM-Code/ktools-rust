@@ -13,7 +13,7 @@ This workspace currently contains:
 
 ## Build Model
 
-Use the relevant child repo when building or testing a specific Rust implementation.
+Use the relevant child component when building or testing a specific Rust implementation.
 
 The shared `kbuild` implementation lives in the sibling [`../kbuild/`](../kbuild/)
 repo. Use `kbuild` from `PATH` when available, or invoke the shared script
@@ -23,13 +23,13 @@ directly:
 python3 ../kbuild/kbuild.py --help
 ```
 
-Each child repo also supports direct Cargo workflows. Repo-local Cargo config
-routes those outputs under this workspace's `build/` tree instead of leaving
-`target/` directories in the source repos.
+Each child component also supports direct Cargo workflows. Component-local
+Cargo config routes those outputs under this workspace's `build/` tree instead
+of leaving `target/` directories in the source components.
 
 ## Where To Go Next
 
-For concrete Rust API and implementation details, use the docs in the relevant child repo.
+For concrete Rust API and implementation details, use the docs in the relevant child component.
 
 Current implementation:
 

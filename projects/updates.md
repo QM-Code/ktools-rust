@@ -6,6 +6,10 @@ Keep `ktools-rust/` structurally simple and fully parity-audited while
 preserving Rust-idiomatic APIs and error handling across both `kcli` and
 `ktrace`.
 
+The `kcli/tests/api/` split and the ignore-rule cleanup are already in place.
+Do not reopen those unless you find a concrete issue. The next iteration is
+the remaining parity, readability, and demo-contract pass.
+
 ## Required Reading
 
 - `../ktools/AGENTS.md`
@@ -30,8 +34,8 @@ preserving Rust-idiomatic APIs and error handling across both `kcli` and
 ## kcli Focus
 
 - Review whether `kcli/src/process/plan.rs` should be split further.
-- Consider splitting `kcli/tests/api.rs` by concern if that would make
-  failures easier to localize.
+- Keep the split `kcli/tests/api.rs` layout easy to scan and extend as
+  remaining parity cases are added.
 - Re-audit aliases, bare inline roots, required and optional values, help
   output, double-dash rejection, and error behavior against the C++ contract.
 - Treat the demo crates as contract checks, not just support material.

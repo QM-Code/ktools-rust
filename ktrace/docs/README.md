@@ -1,7 +1,7 @@
 # Ktrace Rust Docs
 
 This directory contains GitHub-friendly documentation for the Rust `ktrace`
-repo.
+component.
 
 Start with:
 

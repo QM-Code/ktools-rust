@@ -1,7 +1,7 @@
 # Kcli Rust Docs
 
 This directory contains GitHub-friendly documentation for the Rust `kcli`
-repo.
+component.
 
 Start with:
 
